@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc",
-    "style": "prettier --write src/**/*.ts"
+    "style": "prettier --write src/**/*.ts",
+    "style:check": "prettier --check src/**/*.ts",
+    "lint": "eslint src/**/*.ts"
   },
   "bin": "./lib/cli",
   "dependencies": {
