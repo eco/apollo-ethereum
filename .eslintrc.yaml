@@ -1,0 +1,7 @@
+extends:
+  - airbnb-base
+  - prettier
+settings:
+  import/resolver:
+    node:
+      extensions: ['.ts', '.js', '.json']
