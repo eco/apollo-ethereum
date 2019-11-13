@@ -1,0 +1,13 @@
+{
+  "name": "apollo-ethereum-sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "truffle build",
+    "start": "truffle develop"
+  },
+  "devDependencies": {
+    "truffle": "^5.1.0"
+  }
+}
