@@ -1,7 +1,14 @@
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
 extends:
   - airbnb-base
+  - plugin:@typescript-eslint/recommended
   - prettier
+  - prettier/@typescript-eslint
 settings:
   import/resolver:
     node:
-      extensions: ['.ts', '.js', '.json']
+      extensions: ['.ts']
+rules:
+  import/prefer-default-export: off

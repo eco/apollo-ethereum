@@ -5,3 +5,11 @@ cache: yarn
 script:
   - yarn style:check
   - yarn lint
+  - yarn build
+deploy:
+  provider: npm
+  email: mattfysh@gmail.com
+  api_key: $NPM_TOKEN
+  skip_cleanup: true
+  on:
+    tags: true

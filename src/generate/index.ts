@@ -4,10 +4,15 @@ import {
   GraphQLNonNull,
   GraphQLString,
   printSchema,
+  GraphQLFieldConfigMap,
 } from 'graphql'
 
-export default contracts => {
-  const fields = {}
+interface Contract {
+  contractName: string
+}
+
+export default (contracts: Contract[]): string => {
+  const fields: GraphQLFieldConfigMap<null, null> = {}
 
   contracts.forEach(contract => {
     const { contractName: name } = contract
