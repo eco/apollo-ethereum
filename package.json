@@ -1,5 +1,48 @@
 {
   "name": "apollo-ethereum",
-  "version": "0.1.0",
-  "license": "MIT"
+  "version": "0.0.0",
+  "license": "MIT",
+  "bin": "./lib/cli",
+  "main": "./lib/link",
+  "types": "./lib/link/index.d.ts",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc",
+    "clean": "rm -rf lib",
+    "style": "prettier --write src/**/*.ts",
+    "style:check": "prettier --check src/**/*.ts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "apollo-link": "^1.2.13",
+    "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {
+    "@types/mkdirp": "^0.5.2",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-import": "^2.18.2",
+    "graphql": "^14.5.8",
+    "husky": "^3.0.9",
+    "lint-staged": "^9.4.2",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.2"
+  },
+  "peerDependencies": {
+    "graphql": "^14.5.8"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "prettier --write",
+      "git add"
+    ]
+  }
 }
