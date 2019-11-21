@@ -8,6 +8,7 @@ import {
 /**
  * TypeScript Types
  */
+
 type TypeResolver = (size: number) => GraphQLScalarType
 interface TypeMap {
   [typeName: string]: GraphQLScalarType | TypeResolver
@@ -16,7 +17,7 @@ interface GraphResult {
   type: GraphQLScalarType
   isArray: boolean
 }
-type SolidityToGraph = (solidityType: string) => GraphResult
+type SolidityToGraphScalar = (solidityType: string) => GraphResult
 
 /**
  * GraphQL Scalars
@@ -51,7 +52,7 @@ const reType = /^([a-z]+)(\d+)?(\[\d*\])?$/
 /**
  * Converts a solidity type string into a GraphQLScalar type
  */
-export const solidityToGraph: SolidityToGraph = solidityType => {
+export const solidityToGraphScalar: SolidityToGraphScalar = solidityType => {
   const match = solidityType.match(reType)
   if (!match) {
     throw new Error(`Did not match solidity type syntax: ${solidityType}`)

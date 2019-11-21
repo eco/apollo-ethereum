@@ -1,16 +1,15 @@
-const Migrations = artifacts.require("Migrations")
+const Migrations = artifacts.require('Migrations')
+const SimpleStorage = artifacts.require('SimpleStorage')
 const Types = artifacts.require('Types')
-const SimpleStorage = artifacts.require("SimpleStorage")
+const ComplexTypes = artifacts.require('ComplexTypes')
+const Experimental = artifacts.require('Experimental')
 
 module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Migrations)
-
-  // Types
+  await deployer.deploy(SimpleStorage)
   await deployer.deploy(Types)
-
-  // SimpleStorage
-  const simpleStorage = await deployer.deploy(SimpleStorage)
-  await simpleStorage.set('42')
+  await deployer.deploy(ComplexTypes)
+  await deployer.deploy(Experimental)
 
   // fixme: mint test account
   await web3.eth.sendTransaction({

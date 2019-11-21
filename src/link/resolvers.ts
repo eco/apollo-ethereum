@@ -9,6 +9,8 @@ type GetFunction = (contract: any, item: AbiItem, args: any) => any
 const { ethereum } = window as any
 const web3 = new Web3(ethereum)
 
+const normalizeName = (str: string) => str.replace(/^_+/, '') || 'key'
+
 export const createContractResolver: CreateContractResolver = abi => (
   parent,
   args
@@ -17,10 +19,10 @@ export const createContractResolver: CreateContractResolver = abi => (
 const getFunction: GetFunction = (contract, item, args) => {
   if (!item.name || !item.inputs) {
     throw new Error(
-      'Missing required properties `name` and `input` on ABI Item'
+      'Missing required properties `name` and `inputs` on ABI Item'
     )
   }
-  const fnArgs = item.inputs.map(input => args[input.name || 'key'])
+  const fnArgs = item.inputs.map(input => args[normalizeName(input.name)])
   return contract.methods[item.name](...fnArgs)
 }
 

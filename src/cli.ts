@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import mkdirp from 'mkdirp'
-import generate from '../generate'
+import generate from './gen'
 
 // parse CLI options
 const [abiDir, outDir] = process.argv.slice(2).map(dir => path.resolve(dir))
