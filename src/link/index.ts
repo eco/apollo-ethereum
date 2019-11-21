@@ -1,19 +1,22 @@
-import { ApolloLink, Observable } from 'apollo-link'
 import { buildSchema, execute } from 'graphql'
+import { ApolloLink, Observable } from 'apollo-link'
+import { AbiItem } from 'web3-utils'
+import attachResolvers from './attach'
 
-export const createEthLink = (source: string): ApolloLink => {
-  const schema = buildSchema(source)
-  const query = schema.getQueryType()
+interface AbiMap {
+  [contractName: string]: AbiItem[]
+}
+interface LinkOptions {
+  source: string
+  contracts: AbiMap
+}
+type createEthereumLink = (options: LinkOptions) => { link: ApolloLink }
 
-  if (query) {
-    const fields = query.getFields()
-    Object.values(fields).forEach(field => {
-      // eslint-disable-next-line no-param-reassign
-      field.resolve = () => ({ address: '0x' })
-    })
-  }
+export const createEthereumLink: createEthereumLink = options => {
+  const schema = buildSchema(options.source)
+  attachResolvers(schema, options.contracts)
 
-  return new ApolloLink(operation => {
+  const link = new ApolloLink(operation => {
     return new Observable(observer => {
       Promise.resolve(
         execute(schema, operation.query, null, null, operation.variables)
@@ -23,4 +26,6 @@ export const createEthLink = (source: string): ApolloLink => {
       })
     })
   })
+
+  return { link }
 }
