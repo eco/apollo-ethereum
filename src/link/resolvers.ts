@@ -20,7 +20,7 @@ const getFunction: GetFunction = (contract, item, args) => {
       'Missing required properties `name` and `input` on ABI Item'
     )
   }
-  const fnArgs = item.inputs.map(input => args[input.name])
+  const fnArgs = item.inputs.map(input => args[input.name || 'key'])
   return contract.methods[item.name](...fnArgs)
 }
 
