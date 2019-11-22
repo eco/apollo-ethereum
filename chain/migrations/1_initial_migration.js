@@ -1,14 +1,14 @@
 const Migrations = artifacts.require('Migrations')
 const SimpleStorage = artifacts.require('SimpleStorage')
 const Types = artifacts.require('Types')
-const ComplexTypes = artifacts.require('ComplexTypes')
+const Structs = artifacts.require('Structs')
 const Experimental = artifacts.require('Experimental')
 
 module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Migrations)
   await deployer.deploy(SimpleStorage)
   await deployer.deploy(Types)
-  await deployer.deploy(ComplexTypes)
+  await deployer.deploy(Structs)
   await deployer.deploy(Experimental)
 
   // fixme: mint test account

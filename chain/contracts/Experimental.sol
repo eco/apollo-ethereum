@@ -13,10 +13,12 @@ contract Experimental {
     Geo coordinates;
   }
 
+  City public hq;
+
   mapping(string => City) public cities;
 
   constructor() public {
-    cities["mel"] = City("Melbourne", "Victoria", Geo(378136, 1449631));
+    hq = cities["mel"] = City("Melbourne", "Victoria", Geo(378136, 1449631));
   }
 
   function createCity(string memory _id, City memory _city) public {

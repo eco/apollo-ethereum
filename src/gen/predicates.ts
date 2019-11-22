@@ -1,6 +1,4 @@
-import { ReqAbiItem } from './interfaces'
-
-type AbiItemPredicate = (item: ReqAbiItem) => boolean
+import { AbiItemPredicate } from './interfaces'
 
 const isReadFunction: AbiItemPredicate = item =>
   item.type === 'function' && ['view', 'pure'].includes(item.stateMutability)

@@ -2,105 +2,55 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   printSchema,
-  GraphQLFieldConfigMap,
-  GraphQLBoolean,
-  GraphQLScalarType,
-  GraphQLFieldConfigArgumentMap,
-  GraphQLType,
   GraphQLNonNull,
 } from 'graphql'
-import { ReqAbiItem } from './interfaces'
-import { solidityToGraph, solidityToGraphScalar } from './types'
-import { isQueryItem, isMutationItem } from './predicates'
-
-interface AbiMap {
-  [contractName: string]: ReqAbiItem[]
-}
-type Fields = GraphQLFieldConfigMap<null, null>
-
-const addressType: GraphQLScalarType = solidityToGraphScalar('address').type
-
-const normalizeName = (str: string) => str.replace(/^_+/, '') || 'key'
+import { AbiMap, Fields, TypeMap, CachedDefine } from './interfaces'
+import { solidityToGraphContract } from './types/graph-contract'
+import { solidityToGraphScalar } from './types/graph-scalar'
 
 export default (abiMap: AbiMap): string => {
-  const queryContractFields: Fields = {}
-  const mutationContractFields: Fields = {}
+  const queryFields: Fields = {}
+  const mutationFields: Fields = {}
+
+  const typeMap: TypeMap = {}
+  // @ts-ignore
+  const defineType: CachedDefine = (key, define) => {
+    if (!typeMap[key]) {
+      typeMap[key] = define(key)
+    }
+    return typeMap[key]
+  }
 
   Object.entries(abiMap).forEach(([contractName, abi]) => {
-    const queryFields: Fields = {}
-    const mutationFields: Fields = {}
-
-    abi
-      .filter(item => isQueryItem(item) || isMutationItem(item))
-      .forEach(item => {
-        // field input
-        const args: GraphQLFieldConfigArgumentMap = {}
-        item.inputs.forEach(input => {
-          const argName = normalizeName(input.name)
-          const inputType = solidityToGraph(input, contractName, true)
-          args[argName] = { type: new GraphQLNonNull(inputType) }
-        })
-
-        // field output
-        let type: GraphQLType
-        if (!item.outputs.length) {
-          type = GraphQLBoolean
-        } else if (item.outputs.length === 1) {
-          type = solidityToGraph(item.outputs[0], contractName)
-        } else {
-          const outputFields: Fields = {}
-          item.outputs.forEach(output => {
-            const fieldName = normalizeName(output.name)
-            const outputType = solidityToGraph(output, contractName)
-            outputFields[fieldName] = { type: outputType }
-          })
-          type = new GraphQLObjectType({
-            name: `${contractName}_${item.name}`,
-            fields: outputFields,
-          })
-        }
-
-        const fieldConfig = isQueryItem(item) ? queryFields : mutationFields
-        fieldConfig[item.name] = { type, args }
-      })
-
-    // contract args
-    const contractArgs = {
+    const addressType = solidityToGraphScalar('address').type
+    const args = {
       address: {
         type: new GraphQLNonNull(addressType),
       },
     }
 
-    // contract types
-    queryFields._address = { type: addressType }
-    queryContractFields[contractName] = {
-      type: new GraphQLObjectType({
-        name: contractName,
-        fields: queryFields,
-      }),
-      args: contractArgs,
-    }
-    if (Object.keys(mutationFields).length) {
-      mutationContractFields[contractName] = {
-        type: new GraphQLObjectType({
-          name: `${contractName}Mutative`,
-          fields: mutationFields,
-        }),
-        args: contractArgs,
-      }
+    const { query, mutative } = solidityToGraphContract(
+      contractName,
+      abi,
+      defineType
+    )
+
+    queryFields[contractName] = { type: query, args }
+    if (mutative) {
+      mutationFields[contractName] = { type: mutative, args }
     }
   })
 
   const query = new GraphQLObjectType({
     name: 'Query',
-    fields: queryContractFields,
+    fields: queryFields,
   })
 
   let mutation
-  if (Object.keys(mutationContractFields).length) {
+  if (Object.keys(mutationFields).length) {
     mutation = new GraphQLObjectType({
       name: 'Mutation',
-      fields: mutationContractFields,
+      fields: mutationFields,
     })
   }
 

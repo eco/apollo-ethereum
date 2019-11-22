@@ -4,20 +4,11 @@ import {
   GraphQLBoolean,
   GraphQLString,
 } from 'graphql'
-
-/**
- * TypeScript Types
- */
-
-type TypeResolver = (size: number) => GraphQLScalarType
-interface TypeMap {
-  [typeName: string]: GraphQLScalarType | TypeResolver
-}
-interface GraphResult {
-  type: GraphQLScalarType
-  isArray: boolean
-}
-type SolidityToGraphScalar = (solidityType: string) => GraphResult
+import {
+  TypeResolverMap,
+  TypeResolver,
+  SolidityToGraphScalar,
+} from '../interfaces'
 
 /**
  * GraphQL Scalars
@@ -38,7 +29,7 @@ const resolveInt: TypeResolver = size => {
   return size <= 48 ? GraphQLInt : BigNumber
 }
 
-const typeMap: TypeMap = {
+const typeMap: TypeResolverMap = {
   address: Address,
   bool: GraphQLBoolean,
   string: GraphQLString,
