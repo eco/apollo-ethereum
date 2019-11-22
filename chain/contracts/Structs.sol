@@ -6,13 +6,13 @@ contract Structs {
     string state;
   }
 
-  mapping(bytes32 => City) public cities;
+  mapping(string => City) public cities;
 
   constructor() public {
-    cities[keccak256("sfo")] = City("San Francisco", "California");
+    cities["sfo"] = City("San Francisco", "California");
   }
 
-  function createCity(bytes32 _id, string memory _name, string memory _state) public {
+  function createCity(string memory _id, string memory _name, string memory _state) public {
     cities[_id] = City(_name, _state);
   }
 }

@@ -26,7 +26,7 @@ const Address = new GraphQLScalarType({
  * Type Resolvers
  */
 const resolveInt: TypeResolver = size => {
-  return size <= 48 ? GraphQLInt : BigNumber
+  return size && size <= 48 ? GraphQLInt : BigNumber
 }
 
 const typeMap: TypeResolverMap = {
@@ -38,25 +38,18 @@ const typeMap: TypeResolverMap = {
   uint: resolveInt,
 }
 
-const reType = /^([a-z]+)(\d+)?(\[\d*\])?$/
-
 /**
  * Converts a solidity type string into a GraphQLScalar type
  */
-export const solidityToGraphScalar: SolidityToGraphScalar = solidityType => {
-  const match = solidityType.match(reType)
-  if (!match) {
-    throw new Error(`Did not match solidity type syntax: ${solidityType}`)
-  }
-  const [baseType, size, array] = match.slice(1)
-  const resolver = typeMap[baseType]
+export const solidityToGraphScalar: SolidityToGraphScalar = (
+  solidityType,
+  size
+) => {
+  const resolver = typeMap[solidityType]
   if (!resolver) {
     throw new Error(`No resolver found for solidity type: ${solidityType}`)
   }
-  const graphType =
-    typeof resolver === 'function' ? resolver(parseInt(size)) : resolver
-  return {
-    type: graphType,
-    isArray: !!array,
-  }
+  const graphType = typeof resolver === 'function' ? resolver(size) : resolver
+
+  return graphType
 }

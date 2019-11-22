@@ -14,14 +14,23 @@ contract Experimental {
   }
 
   City public hq;
+  City[] public tropical;
 
   mapping(string => City) public cities;
 
   constructor() public {
-    hq = cities["mel"] = City("Melbourne", "Victoria", Geo(378136, 1449631));
+    cities["mel"] = City("Melbourne", "Victoria", Geo(378136, 1449631));
+    cities["bgi"] = City("Bridgetown", "Barbados", Geo(131060, 596132));
+
+    hq = cities["mel"];
+    tropical.push(cities["bgi"]);
   }
 
   function createCity(string memory _id, City memory _city) public {
     cities[_id] = _city;
+  }
+
+  function allTropical() public view returns (City[] memory) {
+    return tropical;
   }
 }

@@ -1,16 +1,10 @@
-import { GraphQLSchema, GraphQLObjectType } from 'graphql'
-import { AbiItem } from 'web3-utils'
+import { GraphQLObjectType } from 'graphql'
 import {
   createContractResolver,
   createReadResolver,
   createWriteResolver,
 } from './resolvers'
-
-interface AbiMap {
-  [contractName: string]: AbiItem[]
-}
-type AttachFieldResolver = (...args: any) => void
-type AttachResolvers = (schema: GraphQLSchema, contracts: AbiMap) => void
+import { AttachFieldResolver, AttachResolvers } from './interfaces'
 
 const attachFieldResolver: AttachFieldResolver = (
   fields,

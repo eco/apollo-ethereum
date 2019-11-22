@@ -1,18 +1,9 @@
 import { buildSchema, execute } from 'graphql'
 import { ApolloLink, Observable } from 'apollo-link'
-import { AbiItem } from 'web3-utils'
 import attachResolvers from './attach'
+import { CreateEthereumLink } from './interfaces'
 
-interface AbiMap {
-  [contractName: string]: AbiItem[]
-}
-interface LinkOptions {
-  source: string
-  contracts: AbiMap
-}
-type createEthereumLink = (options: LinkOptions) => { link: ApolloLink }
-
-export const createEthereumLink: createEthereumLink = options => {
+export const createEthereumLink: CreateEthereumLink = options => {
   const schema = buildSchema(options.source)
   attachResolvers(schema, options.contracts)
 

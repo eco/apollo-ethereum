@@ -10,7 +10,7 @@ import { isQueryItem, isMutationItem } from '../predicates'
 import { solidityToGraphIO } from './graph-io'
 import { solidityToGraphScalar } from './graph-scalar'
 
-const addressType = solidityToGraphScalar('address').type
+const addressType = solidityToGraphScalar('address')
 const normalizeName = (str: string) => str.replace(/^_+/, '') || 'key'
 
 export const solidityToGraphContract: SolidityToGraphContract = (

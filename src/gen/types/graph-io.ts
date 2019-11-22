@@ -1,10 +1,27 @@
-import { GraphQLList, GraphQLInputObjectType, GraphQLObjectType } from 'graphql'
-import { AbiInput, AbiOutput } from 'web3-utils'
-import { CachedDefine, SolidityToGraphIO } from '../interfaces'
+import {
+  GraphQLList,
+  GraphQLInputObjectType,
+  GraphQLObjectType,
+  GraphQLType,
+} from 'graphql'
+import {
+  CachedDefine,
+  SolidityToGraphIO,
+  AbiInput,
+  AbiOutput,
+} from '../interfaces'
 import { solidityToGraphScalar } from './graph-scalar'
 
-const structToTypeName = (str: string) =>
-  str.replace('struct ', '').replace('.', '_')
+const reType = /^([a-z]+)(\d+)?(\[\d*\])?$/
+const reStruct = /^struct ([\w.]+)(\[\d*\])?$/
+
+const structToTypeName = (str: string) => {
+  const match = str.match(reStruct)
+  if (!match) {
+    throw new Error(`Did not match solidity struct name: ${str}`)
+  }
+  return match[1].replace('.', '_')
+}
 
 // @ts-ignore
 export const solidityToGraphIO: SolidityToGraphIO = (
@@ -13,28 +30,42 @@ export const solidityToGraphIO: SolidityToGraphIO = (
   defineType: CachedDefine,
   isInput?: boolean
 ) => {
-  if (solidity.type !== 'tuple') {
-    // scalar or list type
-    const { type, isArray } = solidityToGraphScalar(solidity.type)
-    return isArray ? new GraphQLList(type) : type
-  }
+  let type: GraphQLType
 
-  let name = structToTypeName((solidity as any).internalType)
-  if (isInput) {
-    name = `${name}_Input`
+  const match = solidity.type.match(reType)
+  if (!match) {
+    throw new Error(`Did not match solidity type syntax: ${solidity.type}`)
   }
+  const [baseType, size, array] = match.slice(1)
 
-  return defineType(name, () => {
-    const fields: any = {}
-    if (solidity.components) {
-      solidity.components.forEach((component: AbiInput) => {
-        fields[component.name] = {
-          type: solidityToGraphIO(component, contractName, defineType, isInput),
-        }
-      })
+  if (baseType !== 'tuple') {
+    const intSize = parseInt(size)
+    type = solidityToGraphScalar(baseType, intSize)
+  } else {
+    let name = structToTypeName((solidity as any).internalType)
+    if (isInput) {
+      name = `${name}_Input`
     }
-    return isInput
-      ? new GraphQLInputObjectType({ name, fields })
-      : new GraphQLObjectType({ name, fields })
-  })
+
+    type = defineType(name, () => {
+      const fields: any = {}
+      if (solidity.components) {
+        solidity.components.forEach((component: AbiInput) => {
+          fields[component.name] = {
+            type: solidityToGraphIO(
+              component,
+              contractName,
+              defineType,
+              isInput
+            ),
+          }
+        })
+      }
+      return isInput
+        ? new GraphQLInputObjectType({ name, fields })
+        : new GraphQLObjectType({ name, fields })
+    })
+  }
+
+  return array ? new GraphQLList(type) : type
 }

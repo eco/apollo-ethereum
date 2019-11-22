@@ -1,4 +1,4 @@
-import { AbiItem, AbiInput, AbiOutput } from 'web3-utils'
+import Web3 from 'web3'
 import {
   GraphQLFieldConfigMap,
   GraphQLNamedType,
@@ -7,6 +7,12 @@ import {
   GraphQLOutputType,
   GraphQLScalarType,
 } from 'graphql'
+
+type ContractAbiInput = ConstructorParameters<Web3['eth']['Contract']>[0]
+type AbiItem = Required<Exclude<ContractAbiInput, Array<any>>>
+
+export type AbiInput = AbiItem['inputs'][0]
+export type AbiOutput = AbiItem['outputs'][0]
 
 type ReqAbiItem = Required<AbiItem>
 
@@ -46,15 +52,13 @@ export interface SolidityToGraphIO {
   ): GraphQLOutputType
 }
 
-export type TypeResolver = (size: number) => GraphQLScalarType
+export type TypeResolver = (size?: number) => GraphQLScalarType
 
 export interface TypeResolverMap {
   [typeName: string]: GraphQLScalarType | TypeResolver
 }
 
 export type SolidityToGraphScalar = (
-  solidityType: string
-) => {
-  type: GraphQLScalarType
-  isArray: boolean
-}
+  solidityType: string,
+  size?: number
+) => GraphQLScalarType

@@ -1,10 +1,9 @@
 import Web3 from 'web3'
-import { AbiItem } from 'web3-utils'
-import { GraphQLFieldResolver } from 'graphql'
-
-type CreateContractResolver = (abi: AbiItem[]) => GraphQLFieldResolver<any, any>
-type CreateFieldResolver = (item: AbiItem) => GraphQLFieldResolver<any, any>
-type GetFunction = (contract: any, item: AbiItem, args: any) => any
+import {
+  CreateContractResolver,
+  GetFunction,
+  CreateFieldResolver,
+} from './interfaces'
 
 const { ethereum } = window as any
 const web3 = new Web3(ethereum)

@@ -22,7 +22,7 @@ export default (abiMap: AbiMap): string => {
   }
 
   Object.entries(abiMap).forEach(([contractName, abi]) => {
-    const addressType = solidityToGraphScalar('address').type
+    const addressType = solidityToGraphScalar('address')
     const args = {
       address: {
         type: new GraphQLNonNull(addressType),

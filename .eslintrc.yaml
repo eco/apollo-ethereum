@@ -14,3 +14,4 @@ rules:
   radix: off
   no-underscore-dangle: off
   import/prefer-default-export: off
+  "@typescript-eslint/ban-ts-ignore": warn
