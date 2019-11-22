@@ -1,19 +1,13 @@
-import { ApolloLink, Observable } from 'apollo-link'
 import { buildSchema, execute } from 'graphql'
+import { ApolloLink, Observable } from 'apollo-link'
+import attachResolvers from './attach'
+import { CreateEthereumLink } from './interfaces'
 
-export const createEthLink = (source: string): ApolloLink => {
-  const schema = buildSchema(source)
-  const query = schema.getQueryType()
+export const createEthereumLink: CreateEthereumLink = options => {
+  const schema = buildSchema(options.source)
+  attachResolvers(schema, options.contracts)
 
-  if (query) {
-    const fields = query.getFields()
-    Object.values(fields).forEach(field => {
-      // eslint-disable-next-line no-param-reassign
-      field.resolve = () => ({ address: '0x' })
-    })
-  }
-
-  return new ApolloLink(operation => {
+  const link = new ApolloLink(operation => {
     return new Observable(observer => {
       Promise.resolve(
         execute(schema, operation.query, null, null, operation.variables)
@@ -23,4 +17,6 @@ export const createEthLink = (source: string): ApolloLink => {
       })
     })
   })
+
+  return { link }
 }

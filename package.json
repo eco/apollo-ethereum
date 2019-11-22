@@ -2,20 +2,21 @@
   "name": "apollo-ethereum",
   "version": "0.0.2",
   "license": "MIT",
-  "bin": "./lib/cli",
-  "main": "./lib/link",
-  "types": "./lib/link/index.d.ts",
+  "bin": "bin/apollo-ethereum",
+  "main": "lib/link",
+  "types": "lib/link/index.d.ts",
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc",
     "clean": "rm -rf lib",
-    "style": "prettier --write src/**/*.ts",
-    "style:check": "prettier --check src/**/*.ts",
-    "lint": "eslint src/**/*.ts"
+    "style": "prettier --write 'src/**/*.ts'",
+    "style:check": "prettier --check 'src/**/*.ts'",
+    "lint": "eslint 'src/**/*.ts'"
   },
   "dependencies": {
     "apollo-link": "^1.2.13",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "web3": "^2.0.0-alpha.1"
   },
   "devDependencies": {
     "@types/mkdirp": "^0.5.2",
@@ -41,6 +42,7 @@
   },
   "lint-staged": {
     "src/**/*.ts": [
+      "eslint",
       "prettier --write",
       "git add"
     ]
