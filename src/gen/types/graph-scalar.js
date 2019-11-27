@@ -4,11 +4,6 @@ import {
   GraphQLString,
   GraphQLScalarType,
 } from 'graphql'
-import {
-  TypeResolverMap,
-  TypeResolver,
-  SolidityToGraphScalar,
-} from '../interfaces'
 
 /**
  * GraphQL Scalars
@@ -32,11 +27,11 @@ export const Timestamp = new GraphQLScalarType({
 /**
  * Type Resolvers
  */
-const resolveInt: TypeResolver = size => {
+const resolveInt = size => {
   return size && size <= 48 ? GraphQLInt : BigNumber
 }
 
-const typeMap: TypeResolverMap = {
+const typeMap = {
   address: Address,
   bool: GraphQLBoolean,
   string: GraphQLString,
@@ -48,10 +43,7 @@ const typeMap: TypeResolverMap = {
 /**
  * Converts a solidity type string into a GraphQLScalar type
  */
-export const solidityToGraphScalar: SolidityToGraphScalar = (
-  solidityType,
-  size
-) => {
+export const solidityToGraphScalar = (solidityType, size) => {
   const resolver = typeMap[solidityType]
   if (!resolver) {
     throw new Error(`No resolver found for solidity type: ${solidityType}`)

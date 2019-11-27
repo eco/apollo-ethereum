@@ -1,53 +1,37 @@
-import {
-  GraphQLList,
-  GraphQLInputObjectType,
-  GraphQLObjectType,
-  GraphQLType,
-} from 'graphql'
-import {
-  SolidityToGraphIO,
-  SolidityToGraphIOField,
-  AbiInput,
-  AbiOutput,
-  CachedDefine,
-} from '../interfaces'
+import { GraphQLList, GraphQLInputObjectType, GraphQLObjectType } from 'graphql'
 import { solidityToGraphScalar } from './graph-scalar'
 
 const reType = /^([a-z]+)(\d+)?(\[\d*\])?$/
 const reStruct = /^struct ([\w.]+)(\[\d*\])?$/
 
-const structToTypeName = (str: string) => {
+const structToTypeName = str => {
   const match = str.match(reStruct)
   if (!match) {
     throw new Error(`Did not match solidity struct name: ${str}`)
   }
-  return match[1].split('.')[1] as string
+  return match[1].split('.')[1]
 }
 
 // @ts-ignore
-export const solidityToGraphIOField: SolidityToGraphIOField = (
-  component: AbiInput | AbiOutput,
-  defineType: CachedDefine,
-  isInput?: boolean
-) => {
+export const solidityToGraphIOField = (component, defineType, isInput) => {
   const match = component.type.match(reType)
   if (!match) {
     throw new Error(`Did not match solidity type syntax: ${component.type}`)
   }
   const [baseType, size, array] = match.slice(1)
 
-  let type: GraphQLType
+  let type
   if (baseType !== 'tuple') {
     const intSize = parseInt(size)
     type = solidityToGraphScalar(baseType, intSize)
   } else {
-    let typeName = structToTypeName((component as any).internalType)
+    let typeName = structToTypeName(component.internalType)
     if (isInput) {
       typeName = `${typeName}_Input`
     }
 
     type = defineType(typeName, name => {
-      const fields: any = {}
+      const fields = {}
       if (component.components) {
         component.components.forEach(child => {
           fields[child.name] = {
@@ -64,12 +48,8 @@ export const solidityToGraphIOField: SolidityToGraphIOField = (
   return array ? new GraphQLList(type) : type
 }
 
-export const solidityToGraphIO: SolidityToGraphIO = (
-  io: AbiInput[] | AbiOutput[],
-  defineType: CachedDefine,
-  isInput?: boolean
-) => {
-  const obj: any = {}
+export const solidityToGraphIO = (io, defineType, isInput) => {
+  const obj = {}
   io.forEach(item => {
     const name = item.name.replace(/^_+/, '') || 'key'
     const type = solidityToGraphIOField(item, defineType, isInput)

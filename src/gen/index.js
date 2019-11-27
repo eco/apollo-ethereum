@@ -4,16 +4,15 @@ import {
   printSchema,
   GraphQLNonNull,
 } from 'graphql'
-import { AbiMap, Fields, CachedDefine } from './interfaces'
 import { solidityToGraphContract } from './types/graph-contract'
 import { solidityToGraphScalar } from './types/graph-scalar'
 
-export default (abiMap: AbiMap): string => {
-  const queryFields: Fields = {}
-  const mutationFields: Fields = {}
+export default abiMap => {
+  const queryFields = {}
+  const mutationFields = {}
 
-  const typeMap: any = {}
-  const defineType: CachedDefine = (key, define) => {
+  const typeMap = {}
+  const defineType = (key, define) => {
     if (!typeMap[key]) {
       typeMap[key] = define(key)
     }
@@ -28,7 +27,7 @@ export default (abiMap: AbiMap): string => {
       },
     }
 
-    const defineContractType: CachedDefine = (name, define) =>
+    const defineContractType = (name, define) =>
       defineType(`${contractName}_${name}`, define)
 
     const { query, mutative } = solidityToGraphContract(

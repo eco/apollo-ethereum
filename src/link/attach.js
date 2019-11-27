@@ -5,9 +5,8 @@ import {
   createWriteResolver,
   createEventResolver,
 } from './resolvers'
-import { AttachResolvers } from './interfaces'
 
-const attachResolver: AttachResolvers = (schema, contracts) => {
+const attachResolver = (schema, contracts) => {
   const query = schema.getQueryType()
   const mutation = schema.getMutationType()
   const queryFields = query && query.getFields()
