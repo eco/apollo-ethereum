@@ -1,58 +1,41 @@
-import {
-  GraphQLObjectType,
-  GraphQLBoolean,
-  GraphQLOutputType,
-  GraphQLList,
-} from 'graphql'
-import {
-  Fields,
-  Args,
-  SolidityToGraphContract,
-  AbiInput,
-  AbiOutput,
-} from '../interfaces'
+import { GraphQLObjectType, GraphQLBoolean, GraphQLList } from 'graphql'
 import { isQueryItem, isMutationItem } from '../predicates'
 import { solidityToGraphIO, solidityToGraphIOField } from './graph-io'
 import { Timestamp, solidityToGraphScalar } from './graph-scalar'
 
 const addressType = solidityToGraphScalar('address')
 
-export const solidityToGraphContract: SolidityToGraphContract = (
-  contractName,
-  abi,
-  defineType
-) => {
-  const queryFields: Fields = {}
-  const mutationFields: Fields = {}
+export const solidityToGraphContract = (contractName, abi, defineType) => {
+  const queryFields = {}
+  const mutationFields = {}
 
-  const io = (items: AbiInput[] | AbiOutput[], isInput?: boolean) =>
-    solidityToGraphIO(items, defineType, isInput)
+  const io = (items, isInput) => solidityToGraphIO(items, defineType, isInput)
 
-  const field = (item: AbiOutput) => solidityToGraphIOField(item, defineType)
+  const field = item => solidityToGraphIOField(item, defineType)
 
   abi
     .filter(item => isQueryItem(item) || isMutationItem(item))
     .forEach(item => {
       if (item.type === 'event') {
         const type = defineType(item.name, name => {
-          const fields: Fields = io(item.inputs, false) as Fields
+          const fields = io(item.inputs, false)
           fields._timestamp = { type: Timestamp }
           return new GraphQLObjectType({ name, fields })
         })
         queryFields[item.name] = { type: new GraphQLList(type) }
       } else {
         // input
-        const args: Args = io(item.inputs, true) as Args
+        const args = io(item.inputs, true)
 
         // output
-        let type: GraphQLOutputType
+        let type
         if (!item.outputs.length) {
           type = GraphQLBoolean
         } else if (item.outputs.length === 1) {
-          type = field(item.outputs[0]) as GraphQLOutputType
+          type = field(item.outputs[0])
         } else {
           type = defineType(item.name, name => {
-            const fields: Fields = io(item.outputs) as Fields
+            const fields = io(item.outputs)
             return new GraphQLObjectType({ name, fields })
           })
         }

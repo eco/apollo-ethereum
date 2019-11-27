@@ -4,14 +4,12 @@
   "license": "MIT",
   "bin": "bin/apollo-ethereum",
   "main": "lib/link",
-  "types": "lib/link/index.d.ts",
   "scripts": {
-    "dev": "tsc -w",
-    "build": "tsc",
-    "clean": "rm -rf lib",
-    "style": "prettier --write 'src/**/*.ts'",
-    "style:check": "prettier --check 'src/**/*.ts'",
-    "lint": "eslint 'src/**/*.ts'"
+    "dev": "rollup -c -w",
+    "build": "rollup -c",
+    "style": "prettier --write 'src/**/*.js'",
+    "style:check": "prettier --check 'src/**/*.js'",
+    "lint": "eslint 'src/**/*.js'"
   },
   "dependencies": {
     "apollo-link": "^1.2.13",
@@ -19,9 +17,6 @@
     "web3": "^2.0.0-alpha.1"
   },
   "devDependencies": {
-    "@types/mkdirp": "^0.5.2",
-    "@typescript-eslint/eslint-plugin": "^2.7.0",
-    "@typescript-eslint/parser": "^2.7.0",
     "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.5.0",
@@ -30,7 +25,10 @@
     "husky": "^3.0.9",
     "lint-staged": "^9.4.2",
     "prettier": "^1.19.1",
-    "typescript": "^3.7.2"
+    "rollup": "^1.27.5",
+    "rollup-plugin-auto-external": "^2.0.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
   },
   "peerDependencies": {
     "graphql": "^14.5.8"
@@ -41,7 +39,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.ts": [
+    "src/**/*.js": [
       "eslint",
       "prettier --write",
       "git add"
