@@ -18,6 +18,8 @@ contract Experimental {
 
   mapping(string => City) public cities;
 
+  event CityCreated(City city);
+
   constructor() public {
     cities["mel"] = City("Melbourne", "Victoria", Geo(378136, 1449631));
     cities["bgi"] = City("Bridgetown", "Barbados", Geo(131060, 596132));
@@ -28,6 +30,7 @@ contract Experimental {
 
   function createCity(string memory _id, City memory _city) public {
     cities[_id] = _city;
+    emit CityCreated(_city);
   }
 
   function allTropical() public view returns (City[] memory) {

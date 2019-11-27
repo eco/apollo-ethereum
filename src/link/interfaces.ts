@@ -21,6 +21,8 @@ export type AttachFieldResolver = (...args: any) => void
 
 export type AttachResolvers = (schema: GraphQLSchema, contracts: AbiMap) => void
 
+export type GetFunction = (contract: any, item: AbiItem, args: any) => any
+
 export type CreateContractResolver = (
   abi: AbiItem[]
 ) => GraphQLFieldResolver<any, any>
@@ -29,4 +31,6 @@ export type CreateFieldResolver = (
   item: AbiItem
 ) => GraphQLFieldResolver<any, any>
 
-export type GetFunction = (contract: any, item: AbiItem, args: any) => any
+export type CreateEventResolver = (
+  item: AbiItem
+) => GraphQLFieldResolver<any, any>

@@ -3,6 +3,7 @@ import {
   CreateContractResolver,
   GetFunction,
   CreateFieldResolver,
+  CreateEventResolver,
 } from './interfaces'
 
 const { ethereum } = window as any
@@ -11,7 +12,7 @@ const web3 = new Web3(ethereum)
 const normalizeName = (str: string) => str.replace(/^_+/, '') || 'key'
 
 export const createContractResolver: CreateContractResolver = abi => (
-  parent,
+  _parent,
   args
 ) => new web3.eth.Contract(abi, args.address)
 
@@ -45,4 +46,26 @@ export const createWriteResolver: CreateFieldResolver = item => async (
     promiEvent.on('error', reject)
   })
   return true
+}
+
+export const createEventResolver: CreateEventResolver = item => async contract => {
+  const events: any[] = await contract.getPastEvents(item.name, {
+    fromBlock: 0,
+  })
+
+  return events.map(e => {
+    const values: any = {}
+    item.inputs.forEach(input => {
+      const key = normalizeName(input.name)
+      values[key] = e.returnValues[input.name]
+    })
+    values._timestamp = async () => {
+      let { timestamp: unixTs } = await web3.eth.getBlock(e.blockHash)
+      if (typeof unixTs === 'string') {
+        unixTs = parseInt(unixTs)
+      }
+      return unixTs * 1000
+    }
+    return values
+  })
 }
