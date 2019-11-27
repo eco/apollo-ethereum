@@ -1,8 +1,8 @@
 import {
-  GraphQLScalarType,
   GraphQLInt,
   GraphQLBoolean,
   GraphQLString,
+  GraphQLScalarType,
 } from 'graphql'
 import {
   TypeResolverMap,
@@ -17,9 +17,16 @@ const BigNumber = new GraphQLScalarType({
   name: 'BigNumber',
   serialize: value => value,
 })
+
 const Address = new GraphQLScalarType({
   name: 'Address',
   serialize: value => value.toString(),
+})
+
+export const Timestamp = new GraphQLScalarType({
+  name: 'Timestamp',
+  serialize: value => parseInt(value) * 1000,
+  parseValue: value => new Date(value),
 })
 
 /**

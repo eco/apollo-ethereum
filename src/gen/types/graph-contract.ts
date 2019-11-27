@@ -1,17 +1,21 @@
 import {
   GraphQLObjectType,
   GraphQLBoolean,
-  GraphQLFieldConfigArgumentMap,
-  GraphQLNonNull,
   GraphQLOutputType,
+  GraphQLList,
 } from 'graphql'
-import { Fields, SolidityToGraphContract } from '../interfaces'
+import {
+  Fields,
+  Args,
+  SolidityToGraphContract,
+  AbiInput,
+  AbiOutput,
+} from '../interfaces'
 import { isQueryItem, isMutationItem } from '../predicates'
-import { solidityToGraphIO } from './graph-io'
-import { solidityToGraphScalar } from './graph-scalar'
+import { solidityToGraphIO, solidityToGraphIOField } from './graph-io'
+import { Timestamp, solidityToGraphScalar } from './graph-scalar'
 
 const addressType = solidityToGraphScalar('address')
-const normalizeName = (str: string) => str.replace(/^_+/, '') || 'key'
 
 export const solidityToGraphContract: SolidityToGraphContract = (
   contractName,
@@ -21,56 +25,52 @@ export const solidityToGraphContract: SolidityToGraphContract = (
   const queryFields: Fields = {}
   const mutationFields: Fields = {}
 
+  const io = (items: AbiInput[] | AbiOutput[], isInput?: boolean) =>
+    solidityToGraphIO(items, defineType, isInput)
+
+  const field = (item: AbiOutput) => solidityToGraphIOField(item, defineType)
+
   abi
     .filter(item => isQueryItem(item) || isMutationItem(item))
     .forEach(item => {
-      // field input
-      const args: GraphQLFieldConfigArgumentMap = {}
-      item.inputs.forEach(input => {
-        const argName = normalizeName(input.name)
-        const inputType = solidityToGraphIO(
-          input,
-          contractName,
-          defineType,
-          true
-        )
-        args[argName] = { type: new GraphQLNonNull(inputType) }
-      })
-
-      // field output
-      let type: GraphQLOutputType
-      if (!item.outputs.length) {
-        type = GraphQLBoolean
-      } else if (item.outputs.length === 1) {
-        type = solidityToGraphIO(item.outputs[0], contractName, defineType)
-      } else {
-        type = defineType(`${contractName}_${item.name}`, name => {
-          const fields: Fields = {}
-          item.outputs.forEach(output => {
-            const fieldName = normalizeName(output.name)
-            const outputType = solidityToGraphIO(
-              output,
-              contractName,
-              defineType
-            )
-            fields[fieldName] = { type: outputType }
-          })
+      if (item.type === 'event') {
+        const type = defineType(item.name, name => {
+          const fields: Fields = io(item.inputs, false) as Fields
+          fields._timestamp = { type: Timestamp }
           return new GraphQLObjectType({ name, fields })
         })
-      }
+        queryFields[item.name] = { type: new GraphQLList(type) }
+      } else {
+        // input
+        const args: Args = io(item.inputs, true) as Args
 
-      const fieldConfig = isQueryItem(item) ? queryFields : mutationFields
-      fieldConfig[item.name] = { type, args }
+        // output
+        let type: GraphQLOutputType
+        if (!item.outputs.length) {
+          type = GraphQLBoolean
+        } else if (item.outputs.length === 1) {
+          type = field(item.outputs[0]) as GraphQLOutputType
+        } else {
+          type = defineType(item.name, name => {
+            const fields: Fields = io(item.outputs) as Fields
+            return new GraphQLObjectType({ name, fields })
+          })
+        }
+
+        // add field to config map
+        const fieldConfig = isQueryItem(item) ? queryFields : mutationFields
+        fieldConfig[item.name] = { type, args }
+      }
     })
 
-  // contract query type
+  // schema query type
   queryFields._address = { type: addressType }
   const queryType = new GraphQLObjectType({
     name: contractName,
     fields: queryFields,
   })
 
-  // contract mutation type
+  // schema mutation type
   let mutationType
   if (Object.keys(mutationFields).length) {
     mutationType = new GraphQLObjectType({
