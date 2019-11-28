@@ -8,6 +8,6 @@
     "start": "truffle develop"
   },
   "devDependencies": {
-    "truffle": "^5.1.0"
+    "truffle": "^5.1.1"
   }
 }
