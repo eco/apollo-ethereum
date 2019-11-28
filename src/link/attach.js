@@ -1,4 +1,4 @@
-import { GraphQLObjectType } from 'graphql'
+import { GraphQLObjectType, GraphQLEnumType } from 'graphql'
 import {
   createContractResolver,
   createReadResolver,
@@ -6,14 +6,18 @@ import {
   createEventResolver,
 } from './resolvers'
 
+const scalars = {
+  Timestamp: value => new Date(value * 1000),
+}
+
 const attachResolver = (schema, contracts) => {
   const query = schema.getQueryType()
   const mutation = schema.getMutationType()
   const queryFields = query && query.getFields()
   const mutationFields = mutation && mutation.getFields()
 
+  // contract resolution
   Object.entries(contracts).forEach(([contractName, abi]) => {
-    // contract resolution
     const resolver = createContractResolver(abi)
     if (queryFields && queryFields[contractName]) {
       queryFields[contractName].resolve = resolver
@@ -42,6 +46,32 @@ const attachResolver = (schema, contracts) => {
       }
     })
   })
+
+  // scalars
+  Object.entries(scalars).forEach(([name, serialize]) => {
+    const type = schema.getType(name)
+    if (type) {
+      Object.assign(type, { serialize })
+    }
+  })
+
+  // enums
+  const typeMap = schema.getTypeMap()
+  Object.values(typeMap)
+    .filter(
+      type => type instanceof GraphQLEnumType && !type.name.startsWith('__')
+    )
+    .forEach(type => {
+      const values = {}
+      type.getValues().forEach((value, index) => {
+        values[value.name] = { value: index }
+      })
+      const newType = new GraphQLEnumType({
+        name: type.name,
+        values,
+      })
+      Object.assign(type, newType)
+    })
 }
 
 export default attachResolver

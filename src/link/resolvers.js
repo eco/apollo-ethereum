@@ -53,11 +53,8 @@ export const createEventResolver = item => async contract => {
       values[key] = e.returnValues[input.name]
     })
     values._timestamp = async () => {
-      let { timestamp: unixTs } = await web3.eth.getBlock(e.blockHash)
-      if (typeof unixTs === 'string') {
-        unixTs = parseInt(unixTs)
-      }
-      return unixTs * 1000
+      const block = await web3.eth.getBlock(e.blockHash)
+      return block.timestamp
     }
     return values
   })

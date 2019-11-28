@@ -10,26 +10,14 @@ const reType = /^([a-z]+)(\d+)?$/
 /**
  * GraphQL Scalars
  */
-const Bytes = new GraphQLScalarType({
-  name: 'Bytes',
-  serialize: value => value,
-})
+const serialize = value => value
+const createScalarType = name => new GraphQLScalarType({ name, serialize })
+const Bytes = createScalarType('Bytes')
+const BigNumber = createScalarType('BigNumber')
+const Address = createScalarType('Address')
+const Timestamp = createScalarType('Timestamp')
 
-const BigNumber = new GraphQLScalarType({
-  name: 'BigNumber',
-  serialize: value => value,
-})
-
-export const Address = new GraphQLScalarType({
-  name: 'Address',
-  serialize: value => value.toString(),
-})
-
-export const Timestamp = new GraphQLScalarType({
-  name: 'Timestamp',
-  serialize: value => parseInt(value) * 1000,
-  parseValue: value => new Date(value),
-})
+export { Address, Timestamp }
 
 /**
  * Type Resolvers

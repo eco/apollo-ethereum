@@ -5,7 +5,7 @@ import {
   GraphQLInputObjectType,
   GraphQLBoolean,
 } from 'graphql'
-import { solidityToGraphScalar } from './types/graph-scalar'
+import { solidityToGraphScalar, Timestamp } from './types/graph-scalar'
 
 const normalizeName = name => name.replace(/^_+/, '')
 
@@ -23,6 +23,7 @@ export const graphTypeFromAst = (
       case 'EventDefinition': {
         const eventType = defineContractType(node.name, name => {
           const fields = astToGraph(node.parameters)
+          fields._timestamp = { type: Timestamp }
           return new GraphQLObjectType({ name, fields })
         })
         return {
