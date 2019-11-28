@@ -5,15 +5,22 @@ import {
   GraphQLScalarType,
 } from 'graphql'
 
+const reType = /^([a-z]+)(\d+)?$/
+
 /**
  * GraphQL Scalars
  */
+const Bytes = new GraphQLScalarType({
+  name: 'Bytes',
+  serialize: value => value,
+})
+
 const BigNumber = new GraphQLScalarType({
   name: 'BigNumber',
   serialize: value => value,
 })
 
-const Address = new GraphQLScalarType({
+export const Address = new GraphQLScalarType({
   name: 'Address',
   serialize: value => value.toString(),
 })
@@ -35,7 +42,7 @@ const typeMap = {
   address: Address,
   bool: GraphQLBoolean,
   string: GraphQLString,
-  bytes: GraphQLString,
+  bytes: Bytes,
   int: resolveInt,
   uint: resolveInt,
 }
@@ -43,12 +50,19 @@ const typeMap = {
 /**
  * Converts a solidity type string into a GraphQLScalar type
  */
-export const solidityToGraphScalar = (solidityType, size) => {
-  const resolver = typeMap[solidityType]
-  if (!resolver) {
-    throw new Error(`No resolver found for solidity type: ${solidityType}`)
+export const solidityToGraphScalar = solidityType => {
+  const match = solidityType.match(reType)
+  if (!match) {
+    throw new Error(`Did not match solidity type syntax: ${solidityType}`)
   }
-  const graphType = typeof resolver === 'function' ? resolver(size) : resolver
+  const [baseType, size] = match.slice(1)
+
+  const resolver = typeMap[baseType]
+  if (!resolver) {
+    throw new Error(`No resolver found for solidity type: ${baseType}`)
+  }
+  const graphType =
+    typeof resolver === 'function' ? resolver(parseInt(size)) : resolver
 
   return graphType
 }

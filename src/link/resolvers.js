@@ -3,7 +3,7 @@ import Web3 from 'web3'
 const { ethereum } = window
 const web3 = new Web3(ethereum)
 
-const normalizeName = str => str.replace(/^_+/, '') || 'key'
+const normalizeName = str => str.replace(/^_+/, '')
 
 export const createContractResolver = abi => (_parent, args) =>
   new web3.eth.Contract(abi, args.address)
@@ -14,7 +14,14 @@ const getFunction = (contract, item, args) => {
       'Missing required properties `name` and `inputs` on ABI Item'
     )
   }
-  const fnArgs = item.inputs.map(input => args[normalizeName(input.name)])
+
+  let fnArgs
+  if (item.inputs.length === 1) {
+    fnArgs = Object.values(args)
+  } else {
+    fnArgs = item.inputs.map(input => args[normalizeName(input.name)])
+  }
+
   return contract.methods[item.name](...fnArgs)
 }
 

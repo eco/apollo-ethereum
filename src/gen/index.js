@@ -5,9 +5,10 @@ import {
   GraphQLNonNull,
 } from 'graphql'
 import { solidityToGraphContract } from './types/graph-contract'
-import { solidityToGraphScalar } from './types/graph-scalar'
+import { Address } from './types/graph-scalar'
+import { graphTypeFromAst } from './ast-mapping'
 
-export default abiMap => {
+export default (abiMap, astMap) => {
   const queryFields = {}
   const mutationFields = {}
 
@@ -20,25 +21,32 @@ export default abiMap => {
   }
 
   Object.entries(abiMap).forEach(([contractName, abi]) => {
-    const addressType = solidityToGraphScalar('address')
-    const args = {
-      address: {
-        type: new GraphQLNonNull(addressType),
-      },
-    }
-
+    // generate the graphql objects for the contract - one for queries
+    // and the other for mutations
+    const ast = astMap[contractName]
+    const contractNode = ast.nodes.find(
+      node => node.nodeType === 'ContractDefinition'
+    )
     const defineContractType = (name, define) =>
       defineType(`${contractName}_${name}`, define)
-
     const { query, mutative } = solidityToGraphContract(
       contractName,
       abi,
-      defineContractType
+      itemName => graphTypeFromAst(contractNode, itemName, defineContractType)
     )
 
-    queryFields[contractName] = { type: query, args }
+    // build top-level query and mutation fields from the respective contract types
+    const description = contractNode.documentation
+    const contractArgs = {
+      address: {
+        type: new GraphQLNonNull(Address),
+      },
+    }
+    query.description = description
+    queryFields[contractName] = { type: query, args: contractArgs }
     if (mutative) {
-      mutationFields[contractName] = { type: mutative, args }
+      mutative.description = description
+      mutationFields[contractName] = { type: mutative, args: contractArgs }
     }
   })
 
