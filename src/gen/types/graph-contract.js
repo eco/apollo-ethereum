@@ -1,53 +1,28 @@
-import { GraphQLObjectType, GraphQLBoolean, GraphQLList } from 'graphql'
+import { GraphQLObjectType } from 'graphql'
 import { isQueryItem, isMutationItem } from '../predicates'
-import { solidityToGraphIO, solidityToGraphIOField } from './graph-io'
-import { Timestamp, solidityToGraphScalar } from './graph-scalar'
+import { Address } from './graph-scalar'
 
-const addressType = solidityToGraphScalar('address')
-
-export const solidityToGraphContract = (contractName, abi, defineType) => {
+export const solidityToGraphContract = (
+  contractName,
+  abi,
+  graphTypeFromAst
+) => {
   const queryFields = {}
   const mutationFields = {}
-
-  const io = (items, isInput) => solidityToGraphIO(items, defineType, isInput)
-
-  const field = item => solidityToGraphIOField(item, defineType)
 
   abi
     .filter(item => isQueryItem(item) || isMutationItem(item))
     .forEach(item => {
-      if (item.type === 'event') {
-        const type = defineType(item.name, name => {
-          const fields = io(item.inputs, false)
-          fields._timestamp = { type: Timestamp }
-          return new GraphQLObjectType({ name, fields })
-        })
-        queryFields[item.name] = { type: new GraphQLList(type) }
+      const fieldConfig = graphTypeFromAst(item.name)
+      if (isQueryItem(item)) {
+        queryFields[item.name] = fieldConfig
       } else {
-        // input
-        const args = io(item.inputs, true)
-
-        // output
-        let type
-        if (!item.outputs.length) {
-          type = GraphQLBoolean
-        } else if (item.outputs.length === 1) {
-          type = field(item.outputs[0])
-        } else {
-          type = defineType(item.name, name => {
-            const fields = io(item.outputs)
-            return new GraphQLObjectType({ name, fields })
-          })
-        }
-
-        // add field to config map
-        const fieldConfig = isQueryItem(item) ? queryFields : mutationFields
-        fieldConfig[item.name] = { type, args }
+        mutationFields[item.name] = fieldConfig
       }
     })
 
   // schema query type
-  queryFields._address = { type: addressType }
+  queryFields._address = { type: Address }
   const queryType = new GraphQLObjectType({
     name: contractName,
     fields: queryFields,

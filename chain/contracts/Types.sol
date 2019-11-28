@@ -10,20 +10,20 @@ contract Types {
   int48 public integer = 48;
 
   /* bytes */
-  bytes3 public stringA = "foo";
-  bytes public stringB = "dynamically sized byte sequence";
+  bytes3 public bytesA = "foo";
+  bytes public bytesB = "dynamically sized byte sequence";
 
   /* string */
-  string public stringC = "dynamically sized string";
+  string public stringType = "dynamically sized string";
 
   /* arrays */
   bool[] public bools = [true, false, true];
-  uint256[] public ints = [1, 2, 3, 4, 5];
+  uint8[] public ints = [1, 2, 3, 4, 5];
 
-  /* mappings */
+  // /* mappings */
   mapping(bytes3 => uint256) public tlaScore;
 
-  /* date */
+  // /* date */
   uint256 public createdAt = now;
 
   constructor() public {
@@ -35,7 +35,7 @@ contract Types {
     return bools;
   }
 
-  function allInts() public view returns (uint256[] memory) {
+  function allInts() public view returns (uint8[] memory) {
     return ints;
   }
 }

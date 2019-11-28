@@ -3,6 +3,9 @@ pragma solidity >=0.4.21 <0.6.0;
 contract Events {
   enum LogLevel { Info, Warning, Error }
 
+  /**
+    Represents a log event
+   */
   event LogEvent(LogLevel _level, string message);
 
   constructor() public {
