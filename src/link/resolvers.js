@@ -8,6 +8,12 @@ const normalizeName = str => str.replace(/^_+/, '')
 export const createContractResolver = abi => (_parent, args) =>
   new web3.eth.Contract(abi, args.address)
 
+export const createContractTypeResolver = contractName => async contract => {
+  const code = await web3.eth.getCode(contract.options.address)
+  const hasSelfDestructed = code.toString() === '0x'
+  return hasSelfDestructed ? `${contractName}Complete` : `${contractName}Active`
+}
+
 const getFunction = (contract, item, args) => {
   if (!item.name || !item.inputs) {
     throw new Error(

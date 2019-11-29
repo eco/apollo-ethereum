@@ -20,11 +20,8 @@ contract Types {
   bool[] public bools = [true, false, true];
   uint8[] public ints = [1, 2, 3, 4, 5];
 
-  // /* mappings */
+  /* mappings */
   mapping(bytes3 => uint256) public tlaScore;
-
-  // /* date */
-  uint256 public createdAt = now;
 
   constructor() public {
     tlaScore["foo"] = 32;

@@ -13,17 +13,18 @@
   },
   "dependencies": {
     "apollo-link": "^1.2.13",
+    "js-yaml": "^3.13.1",
     "mkdirp": "^0.5.1",
     "web3": "^2.0.0-alpha.1"
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
+    "eslint": "^6.7.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-import": "^2.18.2",
     "graphql": "^14.5.8",
     "husky": "^3.0.9",
-    "lint-staged": "^9.4.2",
+    "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
     "rollup": "^1.27.5",
     "rollup-plugin-auto-external": "^2.0.0",

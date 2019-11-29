@@ -4,6 +4,8 @@ const Types = artifacts.require('Types')
 const Structs = artifacts.require('Structs')
 const Events = artifacts.require('Events')
 const Experimental = artifacts.require('Experimental')
+const Coercion = artifacts.require('Coercion')
+const SelfDestruct = artifacts.require('SelfDestruct')
 
 module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Migrations)
@@ -12,6 +14,8 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Structs)
   const events = await deployer.deploy(Events)
   await deployer.deploy(Experimental)
+  await deployer.deploy(Coercion)
+  await deployer.deploy(SelfDestruct)
 
   // trigger events
   await events.triggerWarning()
