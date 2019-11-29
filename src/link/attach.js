@@ -1,14 +1,13 @@
-import { GraphQLObjectType, GraphQLEnumType } from 'graphql'
+import { GraphQLEnumType, GraphQLInterfaceType } from 'graphql'
 import {
   createContractResolver,
   createReadResolver,
   createWriteResolver,
   createEventResolver,
+  createContractTypeResolver,
 } from './resolvers'
-
-const scalars = {
-  Timestamp: value => new Date(value * 1000),
-}
+import * as scalars from '../shared/scalars'
+import modifyContract from '../shared/utils'
 
 const attachResolver = (schema, contracts) => {
   const query = schema.getQueryType()
@@ -16,42 +15,51 @@ const attachResolver = (schema, contracts) => {
   const queryFields = query && query.getFields()
   const mutationFields = mutation && mutation.getFields()
 
-  // contract resolution
   Object.entries(contracts).forEach(([contractName, abi]) => {
-    const resolver = createContractResolver(abi)
-    if (queryFields && queryFields[contractName]) {
-      queryFields[contractName].resolve = resolver
+    // contract resolution
+    const contractField = queryFields[contractName]
+    if (contractField) {
+      contractField.resolve = createContractResolver(abi)
+      if (contractField.type instanceof GraphQLInterfaceType) {
+        contractField.type.resolveType = createContractTypeResolver(
+          contractName
+        )
+      }
     }
     if (mutationFields && mutationFields[contractName]) {
-      mutationFields[contractName].resolve = resolver
+      mutationFields[contractName].resolve = createContractResolver(abi)
     }
 
     // field resolution
-    const queryType = schema.getType(contractName)
     const mutationType = schema.getType(`${contractName}Mutative`)
-    const qFields =
-      queryType instanceof GraphQLObjectType && queryType.getFields()
-    const mFields =
-      mutationType instanceof GraphQLObjectType && mutationType.getFields()
-    if (qFields) {
-      qFields._address.resolve = contract => contract.options.address
-    }
+    const mFields = mutationType ? mutationType.getFields() : {}
+
     abi.forEach(item => {
-      if (qFields && item.type === 'event') {
-        qFields[item.name].resolve = createEventResolver(item)
-      } else if (qFields && qFields[item.name]) {
-        qFields[item.name].resolve = createReadResolver(item)
-      } else if (mFields && mFields[item.name]) {
+      if (mFields[item.name]) {
         mFields[item.name].resolve = createWriteResolver(item)
+        return
       }
+
+      const resolver =
+        item.type === 'event'
+          ? createEventResolver(item)
+          : createReadResolver(item)
+
+      modifyContract(schema, contractName, queryType => {
+        const qFields = queryType.getFields()
+        qFields._address.resolve = contract => contract.options.address
+        if (qFields[item.name]) {
+          qFields[item.name].resolve = resolver
+        }
+      })
     })
   })
 
   // scalars
-  Object.entries(scalars).forEach(([name, serialize]) => {
+  Object.entries(scalars).forEach(([name, scalar]) => {
     const type = schema.getType(name)
     if (type) {
-      Object.assign(type, { serialize })
+      Object.assign(type, scalar)
     }
   })
 

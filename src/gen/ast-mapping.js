@@ -4,8 +4,10 @@ import {
   GraphQLEnumType,
   GraphQLInputObjectType,
   GraphQLBoolean,
+  GraphQLNonNull,
 } from 'graphql'
-import { solidityToGraphScalar, Timestamp } from './types/graph-scalar'
+import { solidityToGraphScalar } from './types/graph-scalar'
+import { Timestamp } from '../shared/scalars'
 
 const normalizeName = name => name.replace(/^_+/, '')
 
@@ -103,7 +105,9 @@ export const graphTypeFromAst = (
           if (node.typeName.nodeType === 'ArrayTypeName') {
             return {
               args: {
-                index: { type: solidityToGraphScalar('uint256') },
+                index: {
+                  type: new GraphQLNonNull(solidityToGraphScalar('uint256')),
+                },
               },
               type: astToGraph(node.typeName.baseType),
             }
@@ -112,7 +116,9 @@ export const graphTypeFromAst = (
           if (node.typeName.nodeType === 'Mapping') {
             return {
               args: {
-                key: { type: astToGraph(node.typeName.keyType) },
+                key: {
+                  type: new GraphQLNonNull(astToGraph(node.typeName.keyType)),
+                },
               },
               type: astToGraph(node.typeName.valueType),
             }

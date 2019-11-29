@@ -1,0 +1,19 @@
+contracts:
+  SimpleStorage: true
+  Types: true
+  Structs: true
+  Events: true
+  Experimental: true
+  Coercion:
+    fields:
+      createdAt: Timestamp
+      smallInteger: Int
+      readings.when: Timestamp
+      readings.temp: Int
+      ReadingAdded.when: Timestamp
+      ReadingAdded.temp: Int
+  SelfDestruct:
+    canSelfDestruct: true
+    fields:
+      integer: Int
+      Log.randomNumber: Int

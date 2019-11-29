@@ -1,36 +1,20 @@
-import {
-  GraphQLInt,
-  GraphQLBoolean,
-  GraphQLString,
-  GraphQLScalarType,
-} from 'graphql'
+import { GraphQLBoolean, GraphQLString } from 'graphql'
+import * as scalars from '../../shared/scalars'
 
 const reType = /^([a-z]+)(\d+)?$/
-
-/**
- * GraphQL Scalars
- */
-const serialize = value => value
-const createScalarType = name => new GraphQLScalarType({ name, serialize })
-const Bytes = createScalarType('Bytes')
-const BigNumber = createScalarType('BigNumber')
-const Address = createScalarType('Address')
-const Timestamp = createScalarType('Timestamp')
-
-export { Address, Timestamp }
 
 /**
  * Type Resolvers
  */
 const resolveInt = size => {
-  return size && size <= 48 ? GraphQLInt : BigNumber
+  return size && size <= 48 ? scalars.Int : scalars.BigNumber
 }
 
 const typeMap = {
-  address: Address,
+  address: scalars.Address,
   bool: GraphQLBoolean,
   string: GraphQLString,
-  bytes: Bytes,
+  bytes: scalars.Bytes,
   int: resolveInt,
   uint: resolveInt,
 }

@@ -3,12 +3,13 @@ import {
   GraphQLObjectType,
   printSchema,
   GraphQLNonNull,
+  getNamedType,
 } from 'graphql'
 import { solidityToGraphContract } from './types/graph-contract'
-import { Address } from './types/graph-scalar'
+import * as scalars from '../shared/scalars'
 import { graphTypeFromAst } from './ast-mapping'
 
-export default (abiMap, astMap) => {
+export default (abiMap, astMap, configMap) => {
   const queryFields = {}
   const mutationFields = {}
 
@@ -20,7 +21,11 @@ export default (abiMap, astMap) => {
     return typeMap[key]
   }
 
+  const types = []
+
   Object.entries(abiMap).forEach(([contractName, abi]) => {
+    const config = configMap[contractName]
+
     // generate the graphql objects for the contract - one for queries
     // and the other for mutations
     const ast = astMap[contractName]
@@ -29,17 +34,43 @@ export default (abiMap, astMap) => {
     )
     const defineContractType = (name, define) =>
       defineType(`${contractName}_${name}`, define)
-    const { query, mutative } = solidityToGraphContract(
+
+    const { query, mutative, impl } = solidityToGraphContract(
       contractName,
       abi,
-      itemName => graphTypeFromAst(contractNode, itemName, defineContractType)
+      itemName => graphTypeFromAst(contractNode, itemName, defineContractType),
+      config
     )
+    types.push(...impl)
+
+    // apply type overrides
+    if (config.fields) {
+      impl.concat(query).forEach(qType => {
+        Object.keys(config.fields).forEach(path => {
+          const targetField = path.split('.').reduce(
+            (parentConfig, fieldName) => {
+              if (!parentConfig) {
+                return null
+              }
+              const type = getNamedType(parentConfig.type)
+              return type.getFields()[fieldName]
+            },
+            { type: qType }
+          )
+
+          if (targetField) {
+            const typeName = config.fields[path]
+            targetField.type = scalars[typeName]
+          }
+        })
+      })
+    }
 
     // build top-level query and mutation fields from the respective contract types
     const description = contractNode.documentation
     const contractArgs = {
       address: {
-        type: new GraphQLNonNull(Address),
+        type: new GraphQLNonNull(scalars.Address),
       },
     }
     query.description = description
@@ -63,7 +94,7 @@ export default (abiMap, astMap) => {
     })
   }
 
-  const schema = new GraphQLSchema({ query, mutation })
+  const schema = new GraphQLSchema({ query, mutation, types })
 
   return printSchema(schema)
 }
