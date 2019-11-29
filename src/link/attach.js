@@ -7,7 +7,7 @@ import {
   createContractTypeResolver,
 } from './resolvers'
 import * as scalars from '../shared/scalars'
-import modifyContract from '../shared/utils'
+import { modifyContract } from '../shared/utils'
 
 const attachResolver = (schema, contracts) => {
   const query = schema.getQueryType()
