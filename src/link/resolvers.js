@@ -1,9 +1,12 @@
 import Web3 from 'web3'
 
-const { ethereum } = window
-const web3 = new Web3(ethereum)
+let web3
 
 const normalizeName = str => str.replace(/^_+/, '')
+
+export const setProvider = provider => {
+  web3 = new Web3(provider)
+}
 
 export const createContractResolver = abi => (_parent, args) =>
   new web3.eth.Contract(abi, args.address)

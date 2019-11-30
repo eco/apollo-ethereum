@@ -5,38 +5,48 @@ import yaml from 'js-yaml'
 import generate from './gen'
 import { normalizeConfig } from './config'
 
-// parse CLI options
-const [abiDir, outDir] = process.argv.slice(2).map(dir => path.resolve(dir))
+const run = () => {
+  // parse CLI options
+  const [abiDir, outDir] = process.argv.slice(2).map(dir => path.resolve(dir))
 
-// retrieve config
-let config = yaml.safeLoad(fs.readFileSync('eth.config.yaml', 'utf8'))
-config = normalizeConfig(config)
+  // retrieve config
+  let config = yaml.safeLoad(fs.readFileSync('eth.config.yaml', 'utf8'))
+  config = normalizeConfig(config)
 
-// process files from ABI directory
-const abis = {}
-const asts = {}
-const configs = {}
-Object.entries(config.contracts)
-  .filter(entry => entry[1].enabled)
-  .forEach(([name, contractConfig]) => {
-    const pathname = path.join(abiDir, `${name}.json`)
-    const json = fs.readFileSync(pathname, 'utf-8')
-    const contract = JSON.parse(json)
+  // process files from ABI directory
+  const contracts = {}
+  const abis = {}
+  Object.entries(config.contracts)
+    .filter(entry => entry[1].enabled)
+    .forEach(([name, contractConfig]) => {
+      const pathname = path.join(abiDir, `${name}.json`)
+      const json = fs.readFileSync(pathname, 'utf-8')
+      const contract = JSON.parse(json)
+      contracts[name] = {
+        abi: contract.abi,
+        ast: contract.ast,
+        config: contractConfig,
+      }
+      abis[name] = contract.abi
+    })
 
-    abis[name] = contract.abi
-    asts[name] = contract.ast
-    configs[name] = contractConfig
-  })
+  // generate the contract graph
+  const source = generate(contracts)
 
-// generate the contract graph
-const source = generate(abis, asts, configs)
+  // write schema and config module
+  mkdirp.sync(outDir)
 
-// write schema and config module
-mkdirp.sync(outDir)
+  const graphFile = path.join(outDir, 'ethereum.graphql')
+  fs.writeFileSync(graphFile, source)
 
-const graphFile = path.join(outDir, 'ethereum.graphql')
-fs.writeFileSync(graphFile, source)
+  const configFile = path.join(outDir, 'index.js')
+  const configJson = JSON.stringify({ contracts: abis, source }, null, 2)
+  fs.writeFileSync(configFile, `module.exports = ${configJson}`)
+}
 
-const configFile = path.join(outDir, 'index.js')
-const configJson = JSON.stringify({ contracts: abis, source }, null, 2)
-fs.writeFileSync(configFile, `module.exports = ${configJson}`)
+if (module.parent && module.parent.parent) {
+  // used by tests
+  module.exports = { normalizeConfig, generate }
+} else {
+  run()
+}

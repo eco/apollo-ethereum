@@ -6,6 +6,7 @@ script:
   - yarn style:check
   - yarn lint
   - yarn build
+  - yarn test
 deploy:
   provider: npm
   email: mattfysh@gmail.com

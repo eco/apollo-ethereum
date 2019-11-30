@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c",
-    "style": "prettier --write 'src/**/*.js'",
-    "style:check": "prettier --check 'src/**/*.js'",
-    "lint": "eslint 'src/**/*.js'"
+    "style": "prettier --write '{src,test}/**/*.js'",
+    "style:check": "prettier --check '{src,test}/**/*.js'",
+    "lint": "eslint src test",
+    "test": "truffle test",
+    "test:update": "CHAI_JEST_SNAPSHOT_UPDATE_ALL=true truffle test"
   },
   "dependencies": {
     "apollo-link": "^1.2.13",
@@ -18,18 +20,22 @@
     "web3": "^2.0.0-alpha.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-jest-snapshot": "^2.0.0",
     "eslint": "^6.7.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-import": "^2.18.2",
     "graphql": "^14.5.8",
+    "graphql-tag": "^2.10.1",
     "husky": "^3.0.9",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
     "rollup": "^1.27.5",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "truffle": "^5.1.2"
   },
   "peerDependencies": {
     "graphql": "^14.5.8"
@@ -40,7 +46,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.js": [
+    "{src,test}/**/*.js": [
       "eslint",
       "prettier --write",
       "git add"

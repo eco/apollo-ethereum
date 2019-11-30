@@ -1,0 +1,8 @@
+env:
+  mocha: true
+globals:
+  artifacts: true
+  contract: true
+  expect: true
+  web3: true
+  createClient: true

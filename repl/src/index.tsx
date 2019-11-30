@@ -7,7 +7,13 @@ import { createEthereumLink } from 'apollo-ethereum'
 import ethereumConfig from './graph'
 import './index.css'
 
-const createApolloLink = () => createEthereumLink(ethereumConfig as any)
+const { ethereum } = window as any
+
+const createApolloLink = () => {
+  const link = createEthereumLink(ethereumConfig as any, ethereum)
+  return { link }
+}
+
 
 ReactDOM.render(
   <Provider store={store}>
