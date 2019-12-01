@@ -151,8 +151,8 @@ contract('Experimental', () => {
     expect(city.coordinates.latitude.toString()).to.equal('131060')
   })
 
-  xit('accepts nested structs as function input', async () => {
-    const res = await client.execute(MUTATION_ADD_CITY, {
+  it('accepts nested structs as function input', async () => {
+    await client.execute(MUTATION_ADD_CITY, {
       ...variables,
       id: 'sfo',
       city: {
@@ -161,8 +161,6 @@ contract('Experimental', () => {
         coordinates: { latitude: 12, longitude: 18 },
       },
     })
-
-    console.log(res)
 
     const {
       Experimental: { city },
@@ -177,7 +175,7 @@ contract('Experimental', () => {
     expect(city.coordinates.longitude.toString()).to.equal('18')
   })
 
-  xit('supports events with nested struct fields', async () => {
+  it('supports events with nested struct fields', async () => {
     const {
       Experimental: { CityCreated },
     } = await client.execute(QUERY_CITY_EVENTS, variables)

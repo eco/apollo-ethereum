@@ -24,6 +24,11 @@ global.createClient = (_config, contracts) => {
   const executeEth = async (query, variables) => {
     const operation = { query, variables }
     const res = await makePromise(execute(link, operation))
+    if (res.errors) {
+      // eslint-disable-next-line no-console
+      res.errors.forEach(e => console.error(e))
+      throw new Error(`Errors occurred during graphql execution`)
+    }
     return res.data
   }
 

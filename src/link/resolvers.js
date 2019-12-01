@@ -42,7 +42,8 @@ export const createReadResolver = item => (contract, args) => {
 export const createWriteResolver = item => async (contract, args) => {
   const fn = getFunction(contract, item, args)
   const [from] = await web3.eth.getAccounts()
-  const promiEvent = fn.send({ from })
+  const gas = await fn.estimateGas({ from })
+  const promiEvent = fn.send({ from, gas })
   await new Promise((resolve, reject) => {
     promiEvent.on('transactionHash', resolve)
     promiEvent.on('error', reject)
