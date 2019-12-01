@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: Types generates graphql schema 1`] = `
+"scalar Address
+
+scalar BigNumber
+
+scalar Bytes
+
+type Query {
+  Types(address: Address!): Types
+}
+
+type Types {
+  _address: Address
+  bigNumberA: BigNumber
+  bigNumberB: BigNumber
+  boolean: Boolean
+  bools(index: BigNumber!): Boolean
+  bytesA: Bytes
+  bytesB: Bytes
+  integer: Int
+  ints(index: BigNumber!): Int
+  stringType: String
+  tlaScore(key: Bytes!): BigNumber
+  allBools: [Boolean]
+  allInts: [Int]
+}
+"
+`;
+
+exports[`Contract: Types returns the correct types 1`] = `
+Object {
+  "Types": Object {
+    "allBools": Array [
+      true,
+      false,
+      true,
+    ],
+    "allInts": Array [
+      1,
+      2,
+      3,
+      4,
+      5,
+    ],
+    "bigNumberA": BigNumber {
+      "_hex": "0x2a",
+    },
+    "bigNumberB": BigNumber {
+      "_hex": "0x38",
+    },
+    "bytesA": "0x666f6f",
+    "bytesB": "0x64796e616d6963616c6c792073697a656420627974652073657175656e6365",
+    "firstBool": true,
+    "integer": 48,
+    "lastInt": 5,
+    "stringType": "dynamically sized string",
+    "tlaScore": BigNumber {
+      "_hex": "0x0512",
+    },
+  },
+}
+`;

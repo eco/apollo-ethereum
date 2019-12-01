@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: Structs generates graphql schema 1`] = `
+"scalar Address
+
+type Mutation {
+  Structs(address: Address!): StructsMutative
+}
+
+type Query {
+  Structs(address: Address!): Structs
+}
+
+\\"\\"\\"
+The \`Structs\` contract demonstrates the ability to use complex
+objects across read and write interfaces.
+\\"\\"\\"
+type Structs {
+  _address: Address
+  cities(key: String!): Structs_City
+}
+
+type Structs_City {
+  name: String
+  state: String
+}
+
+\\"\\"\\"
+The \`Structs\` contract demonstrates the ability to use complex
+objects across read and write interfaces.
+\\"\\"\\"
+type StructsMutative {
+  \\"\\"\\"
+  Creates a new city using the provided information. If a city
+  with the same ID exists, it will be overwritten
+  \\"\\"\\"
+  createCity(id: String, name: String, state: String): Boolean
+}
+"
+`;

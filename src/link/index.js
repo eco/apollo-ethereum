@@ -9,7 +9,7 @@ export const createEthereumLink = (options, provider) => {
 
   setProvider(provider)
 
-  const link = new ApolloLink(operation => {
+  return new ApolloLink(operation => {
     return new Observable(observer => {
       Promise.resolve(
         execute(schema, operation.query, null, null, operation.variables)
@@ -19,6 +19,4 @@ export const createEthereumLink = (options, provider) => {
       })
     })
   })
-
-  return { link }
 }

@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: SelfDestruct generates graphql schema 1`] = `
+"scalar Address
+
+type Mutation {
+  SelfDestruct(address: Address!): SelfDestructMutative
+}
+
+type Query {
+  SelfDestruct(address: Address!): SelfDestruct
+}
+
+interface SelfDestruct {
+  _address: Address
+  Log: [SelfDestruct_Log]
+}
+
+type SelfDestruct_Log {
+  message: String
+  randomNumber: Int
+  _timestamp: Timestamp
+}
+
+type SelfDestructActive implements SelfDestruct {
+  _address: Address
+  Log: [SelfDestruct_Log]
+  integer: Int
+  message: String
+}
+
+type SelfDestructComplete implements SelfDestruct {
+  _address: Address
+  Log: [SelfDestruct_Log]
+}
+
+type SelfDestructMutative {
+  destroy: Boolean
+}
+
+scalar Timestamp
+"
+`;

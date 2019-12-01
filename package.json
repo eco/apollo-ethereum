@@ -22,6 +22,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-jest-snapshot": "^2.0.0",
+    "chai-subset": "^1.6.0",
     "eslint": "^6.7.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.5.0",

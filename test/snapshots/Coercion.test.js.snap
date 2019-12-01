@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: Coercion generates graphql schema 1`] = `
+"scalar Address
+
+scalar BigNumber
+
+type Coercion {
+  _address: Address
+  ReadingAdded: [Coercion_ReadingAdded]
+  createdAt: Timestamp
+  readings(index: BigNumber!): Coercion_TempReading
+  smallInteger: Int
+}
+
+type Coercion_ReadingAdded {
+  when: Timestamp
+  temp: Int
+  _timestamp: Timestamp
+}
+
+type Coercion_TempReading {
+  when: Timestamp
+  temp: Int
+}
+
+type CoercionMutative {
+  recordTemp(temp: BigNumber): Boolean
+}
+
+type Mutation {
+  Coercion(address: Address!): CoercionMutative
+}
+
+type Query {
+  Coercion(address: Address!): Coercion
+}
+
+scalar Timestamp
+"
+`;
