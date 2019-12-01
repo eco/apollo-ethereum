@@ -9,7 +9,7 @@ import { solidityToGraphContract } from './types/graph-contract'
 import * as scalars from '../shared/scalars'
 import { graphTypeFromAst } from './ast-mapping'
 
-export default (abiMap, astMap, configMap) => {
+export default contractMap => {
   const queryFields = {}
   const mutationFields = {}
 
@@ -23,12 +23,11 @@ export default (abiMap, astMap, configMap) => {
 
   const types = []
 
-  Object.entries(abiMap).forEach(([contractName, abi]) => {
-    const config = configMap[contractName]
+  Object.entries(contractMap).forEach(([contractName, contract]) => {
+    const { abi, ast, config } = contract
 
     // generate the graphql objects for the contract - one for queries
     // and the other for mutations
-    const ast = astMap[contractName]
     const contractNode = ast.nodes.find(
       node => node.nodeType === 'ContractDefinition'
     )

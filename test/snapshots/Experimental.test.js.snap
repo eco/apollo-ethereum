@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: Experimental generates graphql schema 1`] = `
+"scalar Address
+
+scalar BigNumber
+
+type Experimental {
+  _address: Address
+  CityCreated: [Experimental_CityCreated]
+  cities(key: String!): Experimental_City
+  hq: Experimental_City
+  tropical(index: BigNumber!): Experimental_City
+  allTropical: [Experimental_City]
+}
+
+type Experimental_City {
+  name: String
+  state: String
+  coordinates: Experimental_Geo
+}
+
+input Experimental_City_Input {
+  name: String
+  state: String
+  coordinates: Experimental_Geo_Input
+}
+
+type Experimental_CityCreated {
+  city: Experimental_City
+  _timestamp: Timestamp
+}
+
+type Experimental_Geo {
+  latitude: BigNumber
+  longitude: BigNumber
+}
+
+input Experimental_Geo_Input {
+  latitude: BigNumber
+  longitude: BigNumber
+}
+
+type ExperimentalMutative {
+  createCity(id: String, city: Experimental_City_Input): Boolean
+}
+
+type Mutation {
+  Experimental(address: Address!): ExperimentalMutative
+}
+
+type Query {
+  Experimental(address: Address!): Experimental
+}
+
+scalar Timestamp
+"
+`;

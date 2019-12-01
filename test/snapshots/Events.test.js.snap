@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: Events generates graphql schema 1`] = `
+"scalar Address
+
+type Events {
+  _address: Address
+
+  \\"\\"\\"Represents a log event\\"\\"\\"
+  LogEvent: [Events_LogEvent]
+}
+
+type Events_LogEvent {
+  level: Events_LogLevel
+  message: String
+  _timestamp: Timestamp
+}
+
+enum Events_LogLevel {
+  Info
+  Warning
+  Error
+}
+
+type EventsMutative {
+  triggerWarning: Boolean
+  triggerError: Boolean
+}
+
+type Mutation {
+  Events(address: Address!): EventsMutative
+}
+
+type Query {
+  Events(address: Address!): Events
+}
+
+scalar Timestamp
+"
+`;

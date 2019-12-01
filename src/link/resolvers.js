@@ -1,9 +1,12 @@
 import Web3 from 'web3'
 
-const { ethereum } = window
-const web3 = new Web3(ethereum)
+let web3
 
 const normalizeName = str => str.replace(/^_+/, '')
+
+export const setProvider = provider => {
+  web3 = new Web3(provider)
+}
 
 export const createContractResolver = abi => (_parent, args) =>
   new web3.eth.Contract(abi, args.address)
@@ -39,7 +42,8 @@ export const createReadResolver = item => (contract, args) => {
 export const createWriteResolver = item => async (contract, args) => {
   const fn = getFunction(contract, item, args)
   const [from] = await web3.eth.getAccounts()
-  const promiEvent = fn.send({ from })
+  const gas = await fn.estimateGas({ from })
+  const promiEvent = fn.send({ from, gas })
   await new Promise((resolve, reject) => {
     promiEvent.on('transactionHash', resolve)
     promiEvent.on('error', reject)

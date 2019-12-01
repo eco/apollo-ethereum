@@ -1,6 +1,8 @@
 node_modules
 *.log
 
-# build output
+# library build output
 lib
-graph
+
+# chain build output
+build

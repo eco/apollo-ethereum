@@ -20,7 +20,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "codegen": "../bin/apollo-ethereum ../chain/build/contracts src/graph"
+    "codegen": "../bin/apollo-ethereum ../build/contracts src/graph"
   },
   "eslintConfig": {
     "extends": "react-app"
