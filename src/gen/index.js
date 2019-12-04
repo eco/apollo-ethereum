@@ -2,13 +2,13 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLNonNull,
-  getNamedType,
   GraphQLDirective,
   GraphQLString,
 } from 'graphql'
 import { solidityToGraphContract } from './types/graph-contract'
 import * as scalars from '../shared/scalars'
 import { graphTypeFromAst } from './ast-mapping'
+import { applyFieldConfig } from './fields'
 import { printSchema } from './print'
 
 export default contractMap => {
@@ -46,25 +46,7 @@ export default contractMap => {
 
     // apply type overrides
     if (config.fields) {
-      impl.concat(query).forEach(qType => {
-        Object.keys(config.fields).forEach(path => {
-          const targetField = path.split('.').reduce(
-            (parentConfig, fieldName) => {
-              if (!parentConfig) {
-                return null
-              }
-              const type = getNamedType(parentConfig.type)
-              return type.getFields()[fieldName]
-            },
-            { type: qType }
-          )
-
-          if (targetField) {
-            const typeName = config.fields[path]
-            targetField.type = scalars[typeName]
-          }
-        })
-      })
+      applyFieldConfig(impl.concat(query), config.fields, contractName)
     }
 
     // build top-level query and mutation fields from the respective contract types
@@ -120,6 +102,13 @@ export default contractMap => {
         locations: ['FIELD_DEFINITION'],
         args: {
           interfaceName: { type: GraphQLString },
+        },
+      }),
+      new GraphQLDirective({
+        name: 'mappingIndex',
+        locations: ['FIELD_DEFINITION'],
+        args: {
+          mapping: { type: GraphQLString },
         },
       }),
     ],

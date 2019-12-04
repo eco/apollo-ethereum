@@ -76,12 +76,12 @@ export const createEventResolver = item => async contract => {
  * Directives
  */
 
-const erc1820 = async (resolve, args, config) => {
-  const interfaceHash = web3.utils.keccak256(args.interfaceName)
+const erc1820 = async (resolve, contract, args, directive) => {
+  const interfaceHash = web3.utils.keccak256(directive.args.interfaceName)
 
   const data = web3.eth.abi.encodeFunctionCall(
     {
-      name: config.lookupMethod,
+      name: directive.config.lookupMethod,
       type: 'function',
       inputs: [
         {
@@ -94,13 +94,21 @@ const erc1820 = async (resolve, args, config) => {
   )
 
   const address = await web3.eth.call({
-    to: config.lookupAddress,
+    to: directive.config.lookupAddress,
     data,
   })
-
-  return resolve({
-    address: web3.eth.abi.decodeParameter('address', address),
-  })
+  // eslint-disable-next-line no-param-reassign
+  args.address = web3.eth.abi.decodeParameter('address', address)
+  return resolve(contract, args)
 }
 
-export const directives = { erc1820 }
+const mappingIndex = async (resolve, contract, args, directive) => {
+  const index = await resolve(contract, args)
+  const entries = index.map(async key => {
+    const value = await contract.methods[directive.args.mapping](key).call()
+    return { key, value }
+  })
+  return Promise.all(entries)
+}
+
+export const directives = { erc1820, mappingIndex }

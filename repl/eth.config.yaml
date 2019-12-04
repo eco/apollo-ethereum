@@ -4,6 +4,7 @@ contracts:
   Structs: true
   Events: true
   Experimental: true
+
   Coercion:
     fields:
       createdAt: Timestamp
@@ -12,10 +13,19 @@ contracts:
       readings.temp: Int
       ReadingAdded.when: Timestamp
       ReadingAdded.temp: Int
+
   SelfDestruct:
     canSelfDestruct: true
     fields:
       integer: Int
       Log.randomNumber: Int
+
   FooInterface:
     interfaceName: 'Foo'
+
+  Index:
+    fields:
+      allProfiles:
+        mappingIndex: profiles
+      allProcessed:
+        mappingIndex: processed

@@ -21,6 +21,7 @@ const options = {
 const QUERY = gql`
   query {
     FooInterface {
+      _address
       implementsInterface
     }
   }
@@ -48,6 +49,7 @@ contract('ERC1820', () => {
   it('looks up address on query', async () => {
     const res = await client.execute(QUERY)
     expect(res.FooInterface.implementsInterface).to.equal('Foo')
+    expect(res.FooInterface._address).to.equal(FooInterface.address)
   })
 
   it('looks up address on mutation', async () => {

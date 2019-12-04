@@ -109,13 +109,11 @@ export const attachDirectives = (schema, options) => {
           const directiveConfig = options[directiveName]
 
           // eslint-disable-next-line no-param-reassign
-          field.resolve = async (...args) => {
-            const resolveCallback = updatedFieldArgs => {
-              Object.assign(args[1], updatedFieldArgs)
-              return origResolver(...args)
-            }
-            return resolver(resolveCallback, directiveArgs, directiveConfig)
-          }
+          field.resolve = async (contract, args) =>
+            resolver(origResolver, contract, args, {
+              args: directiveArgs,
+              config: directiveConfig,
+            })
         })
       })
     })

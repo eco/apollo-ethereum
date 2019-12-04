@@ -3,6 +3,8 @@
 exports[`Contract: Types generates graphql schema 1`] = `
 "directive @erc1820(interfaceName: String) on FIELD_DEFINITION
 
+directive @mappingIndex(mapping: String) on FIELD_DEFINITION
+
 scalar Address
 
 scalar BigNumber

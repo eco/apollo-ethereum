@@ -8,6 +8,7 @@ const Coercion = artifacts.require('Coercion')
 const SelfDestruct = artifacts.require('SelfDestruct')
 const FooInterface = artifacts.require('FooInterface')
 const Policy = artifacts.require('Policy')
+const Index = artifacts.require('Index')
 
 module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Migrations)
@@ -20,6 +21,7 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(SelfDestruct)
   const fooInterface = await deployer.deploy(FooInterface)
   const policy = await deployer.deploy(Policy)
+  await deployer.deploy(Index)
 
   // trigger events
   await events.triggerWarning()
