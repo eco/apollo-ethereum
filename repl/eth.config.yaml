@@ -17,3 +17,5 @@ contracts:
     fields:
       integer: Int
       Log.randomNumber: Int
+  FooInterface:
+    interfaceName: 'Foo'

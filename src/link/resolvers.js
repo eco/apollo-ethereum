@@ -62,6 +62,8 @@ export const createEventResolver = item => async contract => {
       const key = normalizeName(input.name)
       values[key] = e.returnValues[input.name]
     })
+    // return a resolver for this field, so that `getBlock` is only
+    // called if the query is requesting a timestamp
     values._timestamp = async () => {
       const block = await web3.eth.getBlock(e.blockHash)
       return block.timestamp
@@ -69,3 +71,36 @@ export const createEventResolver = item => async contract => {
     return values
   })
 }
+
+/**
+ * Directives
+ */
+
+const erc1820 = async (resolve, args, config) => {
+  const interfaceHash = web3.utils.keccak256(args.interfaceName)
+
+  const data = web3.eth.abi.encodeFunctionCall(
+    {
+      name: config.lookupMethod,
+      type: 'function',
+      inputs: [
+        {
+          type: 'bytes32',
+          name: 'interfaceHash',
+        },
+      ],
+    },
+    [interfaceHash]
+  )
+
+  const address = await web3.eth.call({
+    to: config.lookupAddress,
+    data,
+  })
+
+  return resolve({
+    address: web3.eth.abi.decodeParameter('address', address),
+  })
+}
+
+export const directives = { erc1820 }

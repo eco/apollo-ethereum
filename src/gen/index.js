@@ -1,13 +1,15 @@
 import {
   GraphQLSchema,
   GraphQLObjectType,
-  printSchema,
   GraphQLNonNull,
   getNamedType,
+  GraphQLDirective,
+  GraphQLString,
 } from 'graphql'
 import { solidityToGraphContract } from './types/graph-contract'
 import * as scalars from '../shared/scalars'
 import { graphTypeFromAst } from './ast-mapping'
+import { printSchema } from './print'
 
 export default contractMap => {
   const queryFields = {}
@@ -66,17 +68,32 @@ export default contractMap => {
     }
 
     // build top-level query and mutation fields from the respective contract types
-    const description = contractNode.documentation
+    const contractAddressType = config.interfaceName
+      ? scalars.Address
+      : new GraphQLNonNull(scalars.Address)
+
     const contractArgs = {
       address: {
-        type: new GraphQLNonNull(scalars.Address),
+        type: contractAddressType,
       },
     }
-    query.description = description
-    queryFields[contractName] = { type: query, args: contractArgs }
+    const extensions = {}
+    if (config.interfaceName) {
+      extensions.directives = {
+        erc1820: { interfaceName: config.interfaceName },
+      }
+    }
+
+    query.description = contractNode.documentation
+    queryFields[contractName] = { type: query, args: contractArgs, extensions }
+
     if (mutative) {
-      mutative.description = description
-      mutationFields[contractName] = { type: mutative, args: contractArgs }
+      mutative.description = contractNode.documentation
+      mutationFields[contractName] = {
+        type: mutative,
+        args: contractArgs,
+        extensions,
+      }
     }
   })
 
@@ -93,7 +110,20 @@ export default contractMap => {
     })
   }
 
-  const schema = new GraphQLSchema({ query, mutation, types })
+  const schema = new GraphQLSchema({
+    query,
+    mutation,
+    types,
+    directives: [
+      new GraphQLDirective({
+        name: 'erc1820',
+        locations: ['FIELD_DEFINITION'],
+        args: {
+          interfaceName: { type: GraphQLString },
+        },
+      }),
+    ],
+  })
 
   return printSchema(schema)
 }

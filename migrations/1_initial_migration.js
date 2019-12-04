@@ -6,6 +6,8 @@ const Events = artifacts.require('Events')
 const Experimental = artifacts.require('Experimental')
 const Coercion = artifacts.require('Coercion')
 const SelfDestruct = artifacts.require('SelfDestruct')
+const FooInterface = artifacts.require('FooInterface')
+const Policy = artifacts.require('Policy')
 
 module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Migrations)
@@ -16,10 +18,15 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(Experimental)
   await deployer.deploy(Coercion)
   await deployer.deploy(SelfDestruct)
+  const fooInterface = await deployer.deploy(FooInterface)
+  const policy = await deployer.deploy(Policy)
 
   // trigger events
   await events.triggerWarning()
   await events.triggerError()
+
+  // erc1920
+  await policy.setInterface(web3.utils.keccak256('Foo'), fooInterface.address)
 
   // fixme: mint test account
   await web3.eth.sendTransaction({

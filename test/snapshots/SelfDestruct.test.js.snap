@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Contract: SelfDestruct generates graphql schema 1`] = `
-"scalar Address
+"directive @erc1820(interfaceName: String) on FIELD_DEFINITION
+
+scalar Address
 
 type Mutation {
   SelfDestruct(address: Address!): SelfDestructMutative
