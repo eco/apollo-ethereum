@@ -1,11 +1,16 @@
 import { buildSchema, execute } from 'graphql'
 import { ApolloLink, Observable } from 'apollo-link'
-import attachResolvers from './attach'
+import { attachResolvers, attachDirectives } from './attach'
 import { setProvider } from './resolvers'
 
-export const createEthereumLink = (options, provider) => {
-  const schema = buildSchema(options.source)
-  attachResolvers(schema, options.contracts)
+export const createEthereumLink = (config, options) => {
+  const { source, contracts } = config
+  const { provider, erc1820 } = options
+
+  const schema = buildSchema(source)
+
+  attachResolvers(schema, contracts)
+  attachDirectives(schema, { erc1820 }, contracts)
 
   setProvider(provider)
 

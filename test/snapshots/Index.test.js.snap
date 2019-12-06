@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: Index generates graphql schema 1`] = `
+"directive @erc1820(interfaceName: String) on FIELD_DEFINITION
+
+directive @mappingIndex(mapping: String) on FIELD_DEFINITION
+
+directive @contract(field: String) on FIELD_DEFINITION
+
+scalar Address
+
+scalar Bytes
+
+type Index {
+  _address: Address
+  processed(key: Bytes!): Boolean
+  profiles(key: Address!): Index_Profile
+  allProfiles: [Index_allProfiles] @mappingIndex(mapping: \\"profiles\\")
+  allProcessed: [Index_allProcessed] @mappingIndex(mapping: \\"processed\\")
+}
+
+type Index_allProcessed {
+  key: Bytes
+  value: Boolean
+}
+
+type Index_allProfiles {
+  key: Address
+  value: Index_Profile
+}
+
+type Index_Profile {
+  name: String
+  email: String
+}
+
+type Query {
+  Index(address: Address!): Index
+}
+"
+`;

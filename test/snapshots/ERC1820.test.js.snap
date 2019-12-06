@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: ERC1820 generates graphql schema 1`] = `
+"directive @erc1820(interfaceName: String) on FIELD_DEFINITION
+
+directive @mappingIndex(mapping: String) on FIELD_DEFINITION
+
+directive @contract(field: String) on FIELD_DEFINITION
+
+scalar Address
+
+scalar BigNumber
+
+type FooInterface {
+  _address: Address
+  implementsInterface: String
+}
+
+type FooInterfaceMutative {
+  set(x: BigNumber): Boolean
+}
+
+type Mutation {
+  FooInterface(address: Address): FooInterfaceMutative @erc1820(interfaceName: \\"Foo\\")
+}
+
+type Query {
+  FooInterface(address: Address): FooInterface @erc1820(interfaceName: \\"Foo\\")
+}
+"
+`;

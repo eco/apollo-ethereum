@@ -1,19 +1,31 @@
-export const normalizeConfig = config => {
-  const contracts = {}
+/* eslint-disable no-param-reassign */
 
-  Object.entries(config.contracts).forEach(([name, value]) => {
-    let newValue = value
-    if (typeof newValue === 'boolean') {
-      newValue = { enabled: value }
+export const normalizeConfig = config => {
+  const { contracts } = config
+
+  Object.entries(contracts).forEach(([name, contract]) => {
+    if (typeof contract === 'boolean') {
+      contract = { enabled: contract }
     }
-    if (typeof newValue.enabled !== 'boolean') {
-      newValue.enabled = true
+
+    if (typeof contract.enabled !== 'boolean') {
+      contract.enabled = true
     }
-    contracts[name] = newValue
+
+    if (contract.fields) {
+      const { fields } = contract
+
+      Object.entries(fields).forEach(([fieldname, field]) => {
+        if (typeof field === 'string') {
+          field = { type: field }
+        }
+
+        fields[fieldname] = field
+      })
+    }
+
+    contracts[name] = contract
   })
 
-  return {
-    ...config,
-    contracts,
-  }
+  return config
 }

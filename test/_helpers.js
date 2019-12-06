@@ -2,7 +2,7 @@ const { execute, makePromise } = require('apollo-link')
 const { normalizeConfig, generate } = require('../lib/cli')
 const { createEthereumLink } = require('..')
 
-global.createClient = (_config, contracts) => {
+global.createClient = (_config, contracts, options = {}) => {
   const config = normalizeConfig(_config)
   const input = {}
   const ethConfig = { contracts: {} }
@@ -19,7 +19,10 @@ global.createClient = (_config, contracts) => {
 
   ethConfig.source = generate(input)
 
-  const link = createEthereumLink(ethConfig, web3.currentProvider)
+  const link = createEthereumLink(ethConfig, {
+    ...options,
+    provider: web3.currentProvider,
+  })
 
   const executeEth = async (query, variables) => {
     const operation = { query, variables }

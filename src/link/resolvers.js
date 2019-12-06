@@ -1,4 +1,5 @@
 import Web3 from 'web3'
+import { getNamedType } from 'graphql'
 
 let web3
 
@@ -62,6 +63,8 @@ export const createEventResolver = item => async contract => {
       const key = normalizeName(input.name)
       values[key] = e.returnValues[input.name]
     })
+    // return a resolver for this field, so that `getBlock` is only
+    // called if the query is requesting a timestamp
     values._timestamp = async () => {
       const block = await web3.eth.getBlock(e.blockHash)
       return block.timestamp
@@ -69,3 +72,63 @@ export const createEventResolver = item => async contract => {
     return values
   })
 }
+
+/**
+ * Directives
+ */
+
+const erc1820 = (resolve, directive) => async (contract, args) => {
+  const interfaceHash = web3.utils.keccak256(directive.args.interfaceName)
+
+  const data = web3.eth.abi.encodeFunctionCall(
+    {
+      name: directive.config.lookupMethod,
+      type: 'function',
+      inputs: [
+        {
+          type: 'bytes32',
+          name: 'interfaceHash',
+        },
+      ],
+    },
+    [interfaceHash]
+  )
+
+  const address = await web3.eth.call({
+    to: directive.config.lookupAddress,
+    data,
+  })
+
+  // eslint-disable-next-line no-param-reassign
+  args.address = web3.eth.abi.decodeParameter('address', address)
+
+  return resolve()
+}
+
+const mappingIndex = (resolve, directive) => async (contract, args) => {
+  const index = await resolve(contract, args)
+  const entries = index.map(async key => {
+    const value = await contract.methods[directive.args.mapping](key).call()
+    return { key, value }
+  })
+  return Promise.all(entries)
+}
+
+const contract = (resolve, directive, abis) => async (...args) => {
+  const [info] = args.slice(3)
+  const { field } = directive.args
+  const linkedContractName = getNamedType(info.returnType)
+  const abi = abis[linkedContractName]
+  const value = await resolve()
+
+  const createContract = item => {
+    const address = field ? item[field] : item
+    return new web3.eth.Contract(abi, address)
+  }
+
+  return Array.isArray(value)
+    ? value.map(createContract)
+    : createContract(value)
+}
+
+export const directives = { erc1820, mappingIndex, contract }

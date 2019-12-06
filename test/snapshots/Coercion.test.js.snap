@@ -1,7 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Contract: Coercion generates graphql schema 1`] = `
-"scalar Address
+"directive @erc1820(interfaceName: String) on FIELD_DEFINITION
+
+directive @mappingIndex(mapping: String) on FIELD_DEFINITION
+
+directive @contract(field: String) on FIELD_DEFINITION
+
+scalar Address
 
 scalar BigNumber
 
