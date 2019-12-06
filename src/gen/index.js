@@ -2,11 +2,11 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLNonNull,
-  GraphQLDirective,
-  GraphQLString,
+  GraphQLInterfaceType,
 } from 'graphql'
 import { solidityToGraphContract } from './types/graph-contract'
 import * as scalars from '../shared/scalars'
+import * as directives from '../shared/directives'
 import { graphTypeFromAst } from './ast-mapping'
 import { applyFieldConfig } from './fields'
 import { printSchema } from './print'
@@ -40,14 +40,12 @@ export default contractMap => {
       contractName,
       abi,
       itemName => graphTypeFromAst(contractNode, itemName, defineContractType),
-      config
+      config.canSelfDestruct
     )
-    types.push(...impl)
 
-    // apply type overrides
-    if (config.fields) {
-      applyFieldConfig(impl.concat(query), config.fields, contractName)
-    }
+    // query may be an interface if contract can self-destruct
+    // ensure interface implementers are also included in the final schema
+    types.push(...impl)
 
     // build top-level query and mutation fields from the respective contract types
     const contractAddressType = config.interfaceName
@@ -79,6 +77,32 @@ export default contractMap => {
     }
   })
 
+  // apply field configs
+  Object.entries(contractMap).forEach(([contractName, contract]) => {
+    const { config } = contract
+
+    if (!config.fields) {
+      return
+    }
+
+    const getContractType = name => queryFields[name].type
+
+    const queryType = getContractType(contractName)
+    const contractTypes = [queryType]
+
+    if (queryType instanceof GraphQLInterfaceType) {
+      const activeType = types.find(t => t.name === `${contractName}Active`)
+      const completeType = types.find(t => t.name === `${contractName}Complete`)
+      contractTypes.push(activeType, completeType)
+    }
+    applyFieldConfig(
+      contractTypes,
+      config.fields,
+      contractName,
+      getContractType
+    )
+  })
+
   const query = new GraphQLObjectType({
     name: 'Query',
     fields: queryFields,
@@ -97,20 +121,9 @@ export default contractMap => {
     mutation,
     types,
     directives: [
-      new GraphQLDirective({
-        name: 'erc1820',
-        locations: ['FIELD_DEFINITION'],
-        args: {
-          interfaceName: { type: GraphQLString },
-        },
-      }),
-      new GraphQLDirective({
-        name: 'mappingIndex',
-        locations: ['FIELD_DEFINITION'],
-        args: {
-          mapping: { type: GraphQLString },
-        },
-      }),
+      directives.erc1820,
+      directives.mappingIndex,
+      directives.contract,
     ],
   })
 

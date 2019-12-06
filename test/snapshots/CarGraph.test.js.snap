@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract: CarGraph generates graphql schema 1`] = `
+"directive @erc1820(interfaceName: String) on FIELD_DEFINITION
+
+directive @mappingIndex(mapping: String) on FIELD_DEFINITION
+
+directive @contract(field: String) on FIELD_DEFINITION
+
+scalar Address
+
+scalar BigNumber
+
+type Car {
+  _address: Address
+  ReviewAdded: [CarReview] @contract(field: \\"address\\")
+  firstReview: CarReview @contract
+  name: String
+  reviews(index: BigNumber!): Address
+  allReviews: [CarReview] @contract
+}
+
+type CarMutative {
+  addReview(address: Address): Boolean
+}
+
+type CarReview {
+  _address: Address
+  rating: CarReview_Rating
+  review: String
+}
+
+enum CarReview_Rating {
+  Bad
+  Good
+}
+
+type Mutation {
+  Car(address: Address!): CarMutative
+}
+
+type Query {
+  Car(address: Address!): Car
+  CarReview(address: Address!): CarReview
+}
+"
+`;

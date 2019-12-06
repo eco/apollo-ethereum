@@ -10,7 +10,7 @@ export const createEthereumLink = (config, options) => {
   const schema = buildSchema(source)
 
   attachResolvers(schema, contracts)
-  attachDirectives(schema, { erc1820 })
+  attachDirectives(schema, { erc1820 }, contracts)
 
   setProvider(provider)
 

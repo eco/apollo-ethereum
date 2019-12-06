@@ -1,4 +1,5 @@
 import Web3 from 'web3'
+import { getNamedType } from 'graphql'
 
 let web3
 
@@ -76,7 +77,7 @@ export const createEventResolver = item => async contract => {
  * Directives
  */
 
-const erc1820 = async (resolve, contract, args, directive) => {
+const erc1820 = (resolve, directive) => async (contract, args) => {
   const interfaceHash = web3.utils.keccak256(directive.args.interfaceName)
 
   const data = web3.eth.abi.encodeFunctionCall(
@@ -97,12 +98,14 @@ const erc1820 = async (resolve, contract, args, directive) => {
     to: directive.config.lookupAddress,
     data,
   })
+
   // eslint-disable-next-line no-param-reassign
   args.address = web3.eth.abi.decodeParameter('address', address)
-  return resolve(contract, args)
+
+  return resolve()
 }
 
-const mappingIndex = async (resolve, contract, args, directive) => {
+const mappingIndex = (resolve, directive) => async (contract, args) => {
   const index = await resolve(contract, args)
   const entries = index.map(async key => {
     const value = await contract.methods[directive.args.mapping](key).call()
@@ -111,4 +114,21 @@ const mappingIndex = async (resolve, contract, args, directive) => {
   return Promise.all(entries)
 }
 
-export const directives = { erc1820, mappingIndex }
+const contract = (resolve, directive, abis) => async (...args) => {
+  const [info] = args.slice(3)
+  const { field } = directive.args
+  const linkedContractName = getNamedType(info.returnType)
+  const abi = abis[linkedContractName]
+  const value = await resolve()
+
+  const createContract = item => {
+    const address = field ? item[field] : item
+    return new web3.eth.Contract(abi, address)
+  }
+
+  return Array.isArray(value)
+    ? value.map(createContract)
+    : createContract(value)
+}
+
+export const directives = { erc1820, mappingIndex, contract }

@@ -6,7 +6,7 @@ export const solidityToGraphContract = (
   contractName,
   abi,
   graphTypeFromAst,
-  config
+  canSelfDestruct
 ) => {
   const queryFieldsTemporal = {}
   const queryFieldsPersistent = { _address: { type: Address } }
@@ -30,7 +30,7 @@ export const solidityToGraphContract = (
 
   // schema query type
   let queryType
-  if (config.canSelfDestruct) {
+  if (canSelfDestruct) {
     queryType = new GraphQLInterfaceType({
       name: contractName,
       fields: queryFieldsPersistent,

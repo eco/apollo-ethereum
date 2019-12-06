@@ -88,7 +88,7 @@ export const attachResolvers = (schema, contracts) => {
     })
 }
 
-export const attachDirectives = (schema, options) => {
+export const attachDirectives = (schema, options, contracts) => {
   const typeMap = schema.getTypeMap()
   Object.values(typeMap)
     .filter(
@@ -99,21 +99,26 @@ export const attachDirectives = (schema, options) => {
       Object.values(fields).forEach(field => {
         field.astNode.directives.forEach(directive => {
           const origResolver = field.resolve || defaultFieldResolver
-          const directiveName = directive.name.value
 
-          const resolver = directives[directiveName]
           const directiveArgs = {}
           directive.arguments.forEach(arg => {
             directiveArgs[arg.name.value] = arg.value.value
           })
-          const directiveConfig = options[directiveName]
+          const directiveConfig = options[directive.name.value]
 
           // eslint-disable-next-line no-param-reassign
-          field.resolve = async (contract, args) =>
-            resolver(origResolver, contract, args, {
-              args: directiveArgs,
-              config: directiveConfig,
-            })
+          field.resolve = (...resolveArgs) => {
+            const resolveField = () => origResolver(...resolveArgs)
+            const directiveResolver = directives[directive.name.value](
+              resolveField,
+              {
+                args: directiveArgs,
+                config: directiveConfig,
+              },
+              contracts
+            )
+            return directiveResolver(...resolveArgs)
+          }
         })
       })
     })

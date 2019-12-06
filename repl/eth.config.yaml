@@ -5,6 +5,7 @@ contracts:
   Events: true
   Experimental: true
 
+  # runtime schema-level type conversion
   Coercion:
     fields:
       createdAt: Timestamp
@@ -14,18 +15,31 @@ contracts:
       ReadingAdded.when: Timestamp
       ReadingAdded.temp: Int
 
+  # destroyable contracts
   SelfDestruct:
     canSelfDestruct: true
     fields:
       integer: Int
       Log.randomNumber: Int
 
+  # erc1820 registry: contract address lookup
   FooInterface:
     interfaceName: 'Foo'
 
+  # mapping index pattern
   Index:
     fields:
       allProfiles:
         mappingIndex: profiles
       allProcessed:
         mappingIndex: processed
+
+  # contract graph relations: Car -> CarReview[]
+  CarReview: true
+  Car:
+    fields:
+      firstReview: CarReview
+      allReviews: CarReview
+      ReviewAdded:
+        type: CarReview
+        field: address

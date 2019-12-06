@@ -13,7 +13,7 @@ const findField = (root, path) =>
     { type: root }
   )
 
-export const applyFieldConfig = (types, config, contractName) => {
+export const applyFieldConfig = (types, config, contractName, getContract) => {
   types.forEach(qType => {
     Object.keys(config).forEach(path => {
       const targetField = findField(qType, path)
@@ -27,18 +27,28 @@ export const applyFieldConfig = (types, config, contractName) => {
 
       if (fieldConfig.type) {
         newType = scalars[fieldConfig.type]
+        if (!newType) {
+          newType = getContract(fieldConfig.type)
+          let directiveValue = true
+          if (fieldConfig.field) {
+            directiveValue = { field: fieldConfig.field }
+          }
+          targetField.extensions = {
+            directives: {
+              contract: directiveValue,
+            },
+          }
+        }
       } else if (fieldConfig.mappingIndex) {
         const mapping = findField(qType, fieldConfig.mappingIndex)
 
-        newType = new GraphQLList(
-          new GraphQLObjectType({
-            name: `${contractName}_${path.replace(/\./g, '_')}`,
-            fields: {
-              key: { type: getNamedType(mapping.args[0].type) },
-              value: { type: mapping.type },
-            },
-          })
-        )
+        newType = new GraphQLObjectType({
+          name: `${contractName}_${path.replace(/\./g, '_')}`,
+          fields: {
+            key: { type: getNamedType(mapping.args[0].type) },
+            value: { type: mapping.type },
+          },
+        })
 
         targetField.extensions = {
           directives: {
@@ -47,7 +57,8 @@ export const applyFieldConfig = (types, config, contractName) => {
         }
       }
 
-      targetField.type = newType
+      const isList = targetField.type instanceof GraphQLList
+      targetField.type = isList ? new GraphQLList(newType) : newType
     })
   })
 }

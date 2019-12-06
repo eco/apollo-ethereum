@@ -5,6 +5,8 @@ exports[`Contract: ERC1820 generates graphql schema 1`] = `
 
 directive @mappingIndex(mapping: String) on FIELD_DEFINITION
 
+directive @contract(field: String) on FIELD_DEFINITION
+
 scalar Address
 
 scalar BigNumber
