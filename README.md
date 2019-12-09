@@ -75,7 +75,7 @@ npm install apollo-ethereum --save
 
 # Usage
 
-## Building the graphql schema
+## Building the GraphQL schema
 
 The `apollo-ethereum` binary is responsible for converting a folder of compiled Solidity contracts into the final GraphQL schema. First, ensure your contracts have been compiled into a build folder, then:
 
@@ -101,7 +101,7 @@ apollo-ethereum [contracts_dir] [output_dir]
 This script will place two new files in the output dir:
 
 1. **`index.js`** - configuration module to be included in your runtime build
-2. **`ethereum.graphql`** a superfluous schema file which is not required, but may be used by various GraphQL tools to implement additional GraphQL-related tooling. For example, query linting or generating types for use with your application. _Note: Recipes for these tasks will be available shortly._
+2. **`ethereum.graphql`** - a superfluous schema file which is not required, but may be used by various GraphQL tools to implement additional GraphQL-related tooling. For example, query linting or generating types for use with your application. _Note: Recipes for these tasks will be available shortly._
 
 ## Configuring the Apollo GraphQL client
 
