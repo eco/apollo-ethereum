@@ -481,9 +481,9 @@ We can create a one-to-many link from Car to CarReview, using the following conf
 
 ```yaml
 contracts:
-  fields:
-    CarReview: true
-    Car:
+  CarReview: true
+  Car:
+    fields:
       reviews: CarReview
       allReviews: CarReview
 ```
