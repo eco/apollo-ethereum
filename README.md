@@ -128,7 +128,113 @@ const client = new ApolloClient({ link, cache })
 
 ## Type conversion
 
+The schema generation process makes use of both the contract ABI and AST to determine input and output types, however there may be some scenarios where a more suitable type can be selected. For example, a date stored as `uint256`, or perhaps the contract is storing a `int256` value that can be safely converted to a JavaScript-native number without requiring the use of the BigNumber library.
+
+The config YAML allows you to specify type overrides for output fields. You may choose from built-in GraphQL types (String, Int, etc) or scalar types that come bundled with `apollo-ethereum`, listed as follows:
+
+* Bytes
+* Address
+* BigNumber
+* Timestamp
+
+BigNumber and Timestamp will return deserialized data in the appropriate data structure (BigNumber and Date respectively).
+
+### Contract source
+
+```solidity
+pragma solidity >=0.4.21 <0.6.0;
+
+contract Coercion {
+  /* uint to Int */
+  uint256 public smallInteger = 2048;
+
+  /* uint to Timestamp */
+  uint256 public createdAt = now;
+}
+
+```
+
+### eth.config.yaml
+
+```yaml
+contracts:
+  Coercion:
+    fields:
+      smallInteger: Int
+      createdAt: Timestamp
+```
+
+### Generated schema
+
+```graphql
+type Coercion {
+  _address: Address
+  createdAt: Timestamp
+  smallInteger: Int
+}
+```
+
+### Example query
+
+```
+query {
+  Coercion(address: "0x123...") {
+    createdAt # returns an instance of JS-native Date
+    smallInteger # converts the BigNumber into a JS-native Number
+  }
+}
+```
+
+## Mappings and arrays
+
+When mapping and array state variables are compiled, each entry in the mapping or array must be accessed individually, using either a key (mapping) or index (array). For arrays, you may be able to create a function that returns an array of all members, as long as the array members are a primitive type.
+
+### Contract source
+
+```solidity
+pragma solidity >=0.4.21 <0.6.0;
+
+contract Types {
+  uint8[] public ints = [1, 2, 3, 4, 5];
+
+  mapping(bytes3 => uint256) public tlaScore;
+
+  function allInts() public view returns (uint8[] memory) {
+    return ints;
+  }
+}
+```
+
+### eth.config.yaml
+
+The schema generation process handles this automatically - no additional configuration is required.
+
+### Generated schema
+
+```graphql
+type Types {
+  _address: Address
+  ints(index: BigNumber!): Int
+  tlaScore(key: Bytes!): BigNumber
+  allInts: [Int]
+}
+```
+
+### Example query
+
+```graphql
+query {
+  Types(address: "0x123...") {
+    ints(index: 1) # returns second member of array
+    tlaScore(key: "tla") # returns BigNumber located at given key of mapping
+    allInts # returns an array of all integers
+  }
+}
+```
+
 ## Mapping index pattern
+
+
 
 ## ERC1820 interface address registry
 
@@ -189,20 +295,22 @@ We can create a one-to-many link from Car to CarReview, using the following conf
 
 ```yaml
 contracts:
-  CarReview: true
-  Car:
-    allReviews: CarReview
+  fields:
+    CarReview: true
+    Car:
+      reviews: CarReview
+      allReviews: CarReview
 ```
 
-### Generated GraphQL schema
+### Generated schema
 
-This will produce the following GraphQL schema which will allow you to reach through contract relationships, and fetch data from related contracts in a single query.
+This will produce the following GraphQL schema, giving you the ability to reach through contract relationships, and fetch data from related contracts in a single query.
 
 ```graphql
 type Car {
   _address: Address
   name: String
-  reviews(index: BigNumber!): CarReview @conract
+  reviews(index: BigNumber!): CarReview @contract
   allReviews: [CarReview] @contract
 }
 
@@ -238,7 +346,7 @@ query {
   Car(address: "0x123...") {
     _address
     name
-    alleviews {
+    allReviews {
       _address
       rating
       review
