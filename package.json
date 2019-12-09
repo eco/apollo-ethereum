@@ -1,6 +1,6 @@
 {
   "name": "apollo-ethereum",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "license": "MIT",
   "bin": "bin/apollo-ethereum",
   "main": "lib/link",
