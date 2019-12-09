@@ -24,7 +24,7 @@ contracts:
 
   # erc1820 registry: contract address lookup
   FooInterface:
-    interfaceName: 'Foo'
+    interfaceName: Foo
 
   # mapping index pattern
   Index:
