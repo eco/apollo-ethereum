@@ -410,7 +410,7 @@ type SelfDestructMutative {
 
 ### Example query
 
-Notice the use of a [fragment](https://graphql.org/learn/queries/#fragments) to specify which fields should be queried, only when the contract is still active on the chain. Using this syntax ensures that the requested data is only requested if the contract is known to still be active, i.e. has not yet called `selfdestruct`.
+Notice the use of a [fragment](https://graphql.org/learn/queries/#fragments) to specify which fields should be queried, only when the contract is still active on the chain. Using this syntax ensures that the requested data is only fetched from the chain if the contract has not yet self-destructed.
 
 Additionally, you may want to make use of the GraphQL-level field `__typename` to determine whether the contract at the given address is active or not. It will return a string set to either `'<CONTRACT_NAME>Active'` or `'<CONTRACT_NAME>Complete'`.
 
