@@ -341,7 +341,7 @@ query {
 
 ## Contracts using `selfdestruct`
 
-Contracts which make use of `selfdestruct` cannot have state variables queried after they have been destroyed. The only pieces of contract data which remain available after their destruction are the events produced during active state on the Ethereum network. `apollo-ethereum` allows you to configure a `selfdestruct` contract and produces two types during generation - one representing a contract and the "active" state, and another representing the same contract after it has been destroyed, otherwise known as the "complete" state.
+Contracts which make use of `selfdestruct` cannot have state variables queried after they have been destroyed. The only pieces of contract data which remain available after their destruction are the events produced during active state on the Ethereum network. `apollo-ethereum` allows you to configure a `selfdestruct` contract and produces two types during generation - one representing a contract "active" state, and another representing the same contract after it has been destroyed, otherwise known as the "complete" state.
 
 ### Contract source
 
@@ -352,11 +352,11 @@ contract SelfDestruct {
   event Log(string message);
 
   constructor() public {
-    emit Log("Creating the contract", 20);
+    emit Log("Creating the contract");
   }
 
   function destroy() public {
-    emit Log("Destroying the contract", 30);
+    emit Log("Destroying the contract");
     selfdestruct(msg.sender);
   }
 }
